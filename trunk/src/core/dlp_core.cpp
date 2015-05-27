@@ -22,3 +22,8 @@
  */
 
 #include <dlp_core.hpp>
+
+int dlp_get_id()
+{
+    return 0;
+}

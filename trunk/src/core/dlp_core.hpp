@@ -60,4 +60,13 @@
     } \
     (void)0
 
+// log.
+#include <stdio.h>
+extern int dlp_get_id();
+#define dlp_verbose(msg, ...) printf("[verbose][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_info(msg, ...) printf("[info][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_trace(msg, ...) printf("[trace][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_warn(msg, ...) printf("[warn][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_error(msg, ...) printf("[error][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+
 #endif
