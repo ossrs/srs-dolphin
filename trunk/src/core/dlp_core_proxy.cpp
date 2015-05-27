@@ -25,9 +25,16 @@
 
 using namespace std;
 
+#include <st.h>
+
 int dlp_run_proxyer()
 {
     int ret = ERROR_SUCCESS;
+    
+    if ((ret = dlp_st_init()) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
     // TODO: FIXME: run worker to proxy SRS.
     return ret;
 }

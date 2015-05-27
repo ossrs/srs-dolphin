@@ -25,9 +25,16 @@
 
 using namespace std;
 
+#include <st.h>
+
 int dlp_run_srs(int rtmp_port, string binary, string conf)
 {
     int ret = ERROR_SUCCESS;
+    
+    if ((ret = dlp_st_init()) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
     // TODO: FIXME: run srs.
     return ret;
 }

@@ -33,12 +33,32 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <map>
 using namespace std;
 
 #include <st.h>
 
+bool st_initilaized = false;
+std::map<st_thread_t, int> cache;
+
+int dlp_generate_id()
+{
+    if (!st_initilaized) {
+        return 0;
+    }
+    
+    static int id = 100;
+    
+    int gid = id++;
+    cache[st_thread_self()] = gid;
+    return gid;
+}
+
 int dlp_get_id()
 {
+    if (st_initilaized) {
+        return cache[st_thread_self()];
+    }
     return 0;
 }
 
@@ -98,6 +118,33 @@ int dlp_listen_tcp(int port, int& fd)
         return ret;
     }
     dlp_verbose("bind socket success. port=%d, fd=%d", port, fd);
+    
+    return ret;
+}
+
+int dlp_st_init()
+{
+    int ret = ERROR_SUCCESS;
+    
+    // Select the best event system available on the OS. In Linux this is
+    // epoll(). On BSD it will be kqueue.
+    if (st_set_eventsys(ST_EVENTSYS_ALT) == -1) {
+        ret = ERROR_ST_INITIALIZE;
+        dlp_error("st_set_eventsys use %s failed. ret=%d", st_get_eventsys_name(), ret);
+        return ret;
+    }
+    dlp_trace("st_set_eventsys to %s", st_get_eventsys_name());
+    
+    if(st_init() != 0){
+        ret = ERROR_ST_INITIALIZE;
+        dlp_error("st_init failed. ret=%d", ret);
+        return ret;
+    }
+    dlp_trace("st_init success, use %s", st_get_eventsys_name());
+    
+    st_initilaized = true;
+    dlp_generate_id();
+    dlp_trace("st main thread, cid=%d", dlp_get_id());
     
     return ret;
 }

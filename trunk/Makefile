@@ -41,9 +41,9 @@ $(ST_LIB):
 	rm -rf $(OBJS)/st-1.9
 	unzip -q 3rdparty/st-1.9.zip -d $(OBJS)/
 ifeq ($(shell uname -s |grep Darwin > /dev/null 2>&1  && echo yes), yes)
-	make -C $(OBJS)/st-1.9 darwin-debug
+	make -C $(OBJS)/st-1.9 darwin-debug EXTRA_CFLAGS="-DMD_HAVE_KQUEUE"
 else
-	make -C $(OBJS)/st-1.9 linux-debug
+	make -C $(OBJS)/st-1.9 linux-debug EXTRA_CFLAGS="-DMALLOC_STACK -DMD_HAVE_EPOLL"
 endif
 
 CORE_INCS=-I$(SRC)/core $(ST_INCS)

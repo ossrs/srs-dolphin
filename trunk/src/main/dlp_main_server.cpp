@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <algorithm>
 using namespace std;
 
 #include <dlp_core_srs.hpp>
@@ -65,7 +66,12 @@ void dlp_parse_options(
     
     for (int i = 0; i < argc; i++) {
         char* p = argv[i];
-        if (p[0] != '-' || (p[1] != 'v' && p[1] != 'V' && p[1] != 'h' && p[1] != 'p' && p[1] != 'w' && p[1] != 's' && p[1] != 'b' && p[1] != 'c')) {
+        if (p[0] != '-') {
+            continue;
+        }
+        if (p[1] != 'v' && p[1] != 'V' && p[1] != 'h'
+            && p[1] != 'p' && p[1] != 'w' && p[1] != 's' && p[1] != 'b' && p[1] != 'c'
+        ) {
             continue;
         }
         
@@ -238,21 +244,45 @@ int main(int argc, char** argv)
     dlp_trace("dolphin use srs binary at %s", srs_binary.c_str());
     dlp_trace("dolphin use config file %s for srs", srs_config_file.c_str());
     
+    // listen the serve socket for workers.
     std:vector<int> rtmp_fds;
     std::vector<int> rtmp_proxy_ports = dlp_list_to_ints(dlp_proxy_ports);
     if ((ret = dlp_listen_rtmp(rtmp_proxy_ports, rtmp_fds)) != ERROR_SUCCESS) {
         return ret;
     }
     
+    // fork all workers.
     std::vector<int> worker_pids;
     if ((ret = dlp_fork_workers(dlp_worker_process, worker_pids)) != ERROR_SUCCESS) {
         return ret;
     }
     
+    // fork all srs servers.
     std::vector<int> srs_pids;
     std::vector<int> rtmp_service_ports = dlp_list_to_ints(srs_service_ports);
-    if ((ret = dlp_fork_srs(rtmp_service_ports, srs_binary, srs_config_file, worker_pids)) != ERROR_SUCCESS) {
+    if ((ret = dlp_fork_srs(rtmp_service_ports, srs_binary, srs_config_file, srs_pids)) != ERROR_SUCCESS) {
         return ret;
+    }
+    
+    // master wait all child terminated.
+    dlp_trace("dolphin forked %d workers, %d srs.", (int)worker_pids.size(), (int)srs_pids.size());
+    while (!worker_pids.empty() || !srs_pids.empty()){
+        int status = 0;
+        pid_t pid = -1;
+        if ((pid = waitpid(-1, &status, 0)) < 0) {
+            dlp_error("wait child process failed. pid=%d", pid);
+            break;
+        }
+        
+        vector<int>::iterator it = std::find(worker_pids.begin(), worker_pids.end(), pid);
+        if (it != worker_pids.end()) {
+            worker_pids.erase(it);
+        } else if ((it = std::find(srs_pids.begin(), srs_pids.end(), pid)) != srs_pids.end()) {
+            srs_pids.erase(it);
+        }
+        
+        dlp_trace("dolphin child process %d terminated, status=%d. there are running %d workers, %d srs.",
+            pid, status, (int)worker_pids.size(), (int)srs_pids.size());
     }
     
     dlp_trace("dolphin terminated.");
