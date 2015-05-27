@@ -50,8 +50,10 @@ Remark: The conf/dolphin.conf is a default conf for SRS by dolphin, user can use
 
 ```
 cd ~/srs/trunk &&
-./objs/ffmpeg/bin/ffmpeg -re -i ./doc/source.200kbps.768x320.flv \
-    -vcodec copy -acodec copy -f flv -y rtmp://127.0.0.1:1935/live/livestream
+for ((;;)); do
+    ./objs/ffmpeg/bin/ffmpeg -re -i ./doc/source.200kbps.768x320.flv \
+        -vcodec copy -acodec copy -f flv -y rtmp://127.0.0.1:1935/live/livestream
+done
 ```
 
 **Step 5:** Play stream
