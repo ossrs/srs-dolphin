@@ -27,7 +27,7 @@ cd ~ && git clone https://github.com/simple-rtmp-server/srs.git &&
 cd ~/srs/trunk && ./configure --with-ffmpeg && make && ./objs/srs -c conf/srs.conf
 ```
 
-Remark: We clone the SRS and Dolphin to user home, user can specifies others.
+Remark: We clone the SRS and Dolphin to user home, user can specify others.
 
 **Step 2:** Clone the srs-dolphin:
 
