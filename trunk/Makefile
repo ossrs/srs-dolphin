@@ -33,9 +33,9 @@ prepare:
 ST_LIB=$(OBJS)/st-1.9/obj/libst.a
 ST_INCS=-I$(OBJS)/st-1.9/obj
 
-$(OBJS)/srs_dolphin: $(ST_LIB) $(OBJS)/core/dlp_core.o $(OBJS)/main/dlp_main_server.o
+$(OBJS)/srs_dolphin: $(ST_LIB) $(OBJS)/core/dlp_core.o $(OBJS)/core/dlp_core_proxy.o $(OBJS)/core/dlp_core_srs.o $(OBJS)/main/dlp_main_server.o
 	@echo "LINK the srs-dolphin, multiple process SRS."
-	$(LINK) -o $(OBJS)/srs_dolphin $(OBJS)/core/dlp_core.o $(OBJS)/main/dlp_main_server.o $(ST_LIB)
+	$(LINK) -o $(OBJS)/srs_dolphin $(OBJS)/core/dlp_core.o $(OBJS)/core/dlp_core_proxy.o $(OBJS)/core/dlp_core_srs.o $(OBJS)/main/dlp_main_server.o $(ST_LIB)
 
 $(ST_LIB):
 	rm -rf $(OBJS)/st-1.9
@@ -50,6 +50,10 @@ CORE_INCS=-I$(SRC)/core $(ST_INCS)
 CORE_DEPS=$(SRC)/core/dlp_core.hpp
 $(OBJS)/core/dlp_core.o: $(CORE_DEPS) $(SRC)/core/dlp_core.cpp
 	$(CXX) -c $(CXXFLAGS) $(CORE_INCS) -o $(OBJS)/core/dlp_core.o $(SRC)/core/dlp_core.cpp
+$(OBJS)/core/dlp_core_proxy.o: $(CORE_DEPS) $(SRC)/core/dlp_core_proxy.cpp
+	$(CXX) -c $(CXXFLAGS) $(CORE_INCS) -o $(OBJS)/core/dlp_core_proxy.o $(SRC)/core/dlp_core_proxy.cpp
+$(OBJS)/core/dlp_core_srs.o: $(CORE_DEPS) $(SRC)/core/dlp_core_srs.cpp
+	$(CXX) -c $(CXXFLAGS) $(CORE_INCS) -o $(OBJS)/core/dlp_core_srs.o $(SRC)/core/dlp_core_srs.cpp
 
 $(OBJS)/main/dlp_main_server.o: $(CORE_DEPS) $(SRC)/main/dlp_main_server.cpp
 	$(CXX) -c $(CXXLFAGS) $(CORE_INCS) -o $(OBJS)/main/dlp_main_server.o $(SRC)/main/dlp_main_server.cpp

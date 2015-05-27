@@ -10,6 +10,8 @@
 		3C5814931B15EC6500980A53 /* dlp_main_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3C5814921B15EC6500980A53 /* dlp_main_server.cpp */; };
 		3CC7535B1B15EE2900481266 /* dlp_core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CC7535A1B15EE2900481266 /* dlp_core.cpp */; };
 		3CC7535D1B15F13B00481266 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 3CC7535C1B15F13B00481266 /* Makefile */; };
+		3CC753621B16195300481266 /* dlp_core_proxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CC7535E1B16195300481266 /* dlp_core_proxy.cpp */; };
+		3CC753631B16195300481266 /* dlp_core_srs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CC753601B16195300481266 /* dlp_core_srs.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +32,10 @@
 		3C5814921B15EC6500980A53 /* dlp_main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_main_server.cpp; path = ../../../src/main/dlp_main_server.cpp; sourceTree = "<group>"; };
 		3CC7535A1B15EE2900481266 /* dlp_core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_core.cpp; path = ../../../src/core/dlp_core.cpp; sourceTree = "<group>"; };
 		3CC7535C1B15F13B00481266 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../Makefile; sourceTree = "<group>"; };
+		3CC7535E1B16195300481266 /* dlp_core_proxy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_core_proxy.cpp; path = ../../../src/core/dlp_core_proxy.cpp; sourceTree = "<group>"; };
+		3CC7535F1B16195300481266 /* dlp_core_proxy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = dlp_core_proxy.hpp; path = ../../../src/core/dlp_core_proxy.hpp; sourceTree = "<group>"; };
+		3CC753601B16195300481266 /* dlp_core_srs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_core_srs.cpp; path = ../../../src/core/dlp_core_srs.cpp; sourceTree = "<group>"; };
+		3CC753611B16195300481266 /* dlp_core_srs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = dlp_core_srs.hpp; path = ../../../src/core/dlp_core_srs.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +86,10 @@
 		3C5814901B15EC4500980A53 /* core */ = {
 			isa = PBXGroup;
 			children = (
+				3CC7535E1B16195300481266 /* dlp_core_proxy.cpp */,
+				3CC7535F1B16195300481266 /* dlp_core_proxy.hpp */,
+				3CC753601B16195300481266 /* dlp_core_srs.cpp */,
+				3CC753611B16195300481266 /* dlp_core_srs.hpp */,
 				3CC7535A1B15EE2900481266 /* dlp_core.cpp */,
 				3C5814911B15EC5400980A53 /* dlp_core.hpp */,
 			);
@@ -142,9 +152,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CC753621B16195300481266 /* dlp_core_proxy.cpp in Sources */,
 				3CC7535D1B15F13B00481266 /* Makefile in Sources */,
 				3C5814931B15EC6500980A53 /* dlp_main_server.cpp in Sources */,
 				3CC7535B1B15EE2900481266 /* dlp_core.cpp in Sources */,
+				3CC753631B16195300481266 /* dlp_core_srs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

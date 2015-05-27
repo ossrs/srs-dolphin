@@ -35,6 +35,9 @@
 #include <sys/wait.h>
 using namespace std;
 
+#include <dlp_core_srs.hpp>
+#include <dlp_core_proxy.hpp>
+
 void parse_options(
     int argc, char** argv,
     bool& show_version, bool& show_help, string& dlp_proxy_ports, int& dlp_worker_process,
@@ -144,20 +147,6 @@ int dlp_listen_rtmp(vector<int> ports, vector<int>& fds)
         dlp_info("dolphin serve at tcp://%d", port);
     }
     
-    return ret;
-}
-
-int dlp_run_proxyer()
-{
-    int ret = ERROR_SUCCESS;
-    // TODO: FIXME: run worker to proxy SRS.
-    return ret;
-}
-
-int dlp_run_srs(int rtmp_port, string binary, string conf)
-{
-    int ret = ERROR_SUCCESS;
-    // TODO: FIXME: run srs.
     return ret;
 }
 
