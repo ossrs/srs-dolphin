@@ -61,6 +61,10 @@ Origin SRS stream: rtmp://127.0.0.1:1935/live/livestream
 Edge Dolphin stream: rtmp://127.0.0.1:19350/live/livestream
 ```
 
+## Features
+
+1. [dev] Multiple Processes for SRS edge, devliery in RTMP/HTTP-FLV.
+
 Winlin 2015.5
 
 [SRS]: https://github.com/simple-rtmp-server/srs
