@@ -27,7 +27,7 @@ using namespace std;
 
 #include <st.h>
 
-int dlp_run_proxyer(int service_port)
+int dlp_run_proxyer(int port, int fd)
 {
     int ret = ERROR_SUCCESS;
     
@@ -35,7 +35,7 @@ int dlp_run_proxyer(int service_port)
         return ret;
     }
     
-    dlp_trace("dolphin worker serve port %d", service_port);
+    dlp_trace("dolphin worker serve port=%d, fd=%d", port, fd);
     
     // TODO: FIXME: run worker to proxy SRS.
     return ret;

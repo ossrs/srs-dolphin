@@ -30,6 +30,6 @@
 
 #include <dlp_core.hpp>
 
-extern int dlp_run_proxyer(int service_port);
+extern int dlp_run_proxyer(int port, int fd);
 
 #endif
