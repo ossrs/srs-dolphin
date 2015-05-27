@@ -235,7 +235,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "../../src/**";
+				USER_HEADER_SEARCH_PATHS = "../../src/** ../../objs/st-1.9/obj";
 			};
 			name = Debug;
 		};
@@ -246,7 +246,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++98";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "../../src/**";
+				USER_HEADER_SEARCH_PATHS = "../../src/** ../../objs/st-1.9/obj";
 			};
 			name = Release;
 		};

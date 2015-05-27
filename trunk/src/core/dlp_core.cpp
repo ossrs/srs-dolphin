@@ -23,6 +23,8 @@
 
 #include <dlp_core.hpp>
 
+#include <st.h>
+
 int dlp_get_id()
 {
     return 0;
