@@ -20,33 +20,33 @@ Remark:
 
 ## Usage
 
-** Step 1: ** Prepare SRS:
+**Step 1:** Prepare SRS:
 
 ```
 cd ~ && git clone https://github.com/simple-rtmp-server/srs.git &&
 cd ~/srs/trunk && ./configure --with-ffmpeg && make && ./objs/srs -c conf/srs.conf
 ```
 
-** Step 2: ** Clone the srs-dolphin:
+**Step 2:** Clone the srs-dolphin:
 
 ```
 cd ~ && git clone https://github.com/simple-rtmp-server/srs-dolphin.git
 ```
 
-** Step 3: ** Build the srs-dolphin:
+**Step 3:** Build the srs-dolphin:
 
 ```
 cd ~/srs-dolphin/trunk && make
 ```
 
-** Step 4: ** Run dolphin
+**Step 4:** Run dolphin
 
 ```
 cd ~/srs-dolphin/trunk && 
 ./objs/srs_dolphin -p 19350 -w 4 -s 1936,1937,1938,1939 -b ../../srs/trunk/objs/srs -c conf/srs.conf
 ```
 
-** Step 5: ** Publish stream
+**Step 5:** Publish stream
 
 ```
 cd ~/srs/trunk &&
@@ -54,7 +54,7 @@ cd ~/srs/trunk &&
     -vcodec copy -acodec copy -f flv -y rtmp://127.0.0.1:1935/live/livestream
 ```
 
-** Step 6: ** Play stream
+**Step 6:** Play stream
 
 ```
 Origin SRS stream: rtmp://127.0.0.1:1935/live/livestream
