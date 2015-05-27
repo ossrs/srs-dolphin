@@ -43,8 +43,13 @@ cd ~/srs-dolphin/trunk && make
 
 ```
 cd ~/srs-dolphin/trunk && 
-./objs/srs_dolphin -p 19350 -w 4 -s 1936,1937,1938,1939 -b ../../srs/trunk/objs/srs -c conf/srs.conf
+./objs/srs_dolphin -p 19350 -w 4 -s 1936,1937,1938,1939 \
+    -b ../../srs/trunk/objs/srs -c conf/dolphin.conf
 ```
+
+Remark: User can specifies the SRS in other valid path.
+
+Remark: The conf/dolphin.conf is a default conf for SRS by dolphin, user can use others.
 
 **Step 5:** Publish stream
 
