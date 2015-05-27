@@ -69,4 +69,16 @@ extern int dlp_get_id();
 #define dlp_warn(msg, ...) printf("[warn][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
 #define dlp_error(msg, ...) printf("[error][%d] ", dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
 
+// errors.
+
+#define ERROR_SUCCESS 0
+#define ERROR_SOCKET_LISTEN     1000
+#define ERROR_FORK_WORKER       1001
+
+// utilies.
+#include <string>
+#include <vector>
+extern std::vector<int> dlp_list_to_ints(std::string str_list);
+extern int dlp_listen_tcp(int port, int& fd);
+
 #endif

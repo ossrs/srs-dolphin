@@ -23,7 +23,16 @@
 
 #include <dlp_core.hpp>
 
-#include <string>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 using namespace std;
 
 void parse_options(
@@ -120,8 +129,96 @@ void parse_options(
     }
 }
 
+int dlp_listen_rtmp(vector<int> ports, vector<int>& fds)
+{
+    int ret = ERROR_SUCCESS;
+    
+    for (int i = 0; i < (int)ports.size(); i++) {
+        int port = ports.at(i);
+        int fd = -1;
+        
+        if ((ret = dlp_listen_tcp(port, fd)) != ERROR_SUCCESS) {
+            return ret;
+        }
+        
+        dlp_info("dolphin serve at tcp://%d", port);
+    }
+    
+    return ret;
+}
+
+int dlp_run_proxyer()
+{
+    int ret = ERROR_SUCCESS;
+    // TODO: FIXME: run worker to proxy SRS.
+    return ret;
+}
+
+int dlp_run_srs(int rtmp_port, string binary, string conf)
+{
+    int ret = ERROR_SUCCESS;
+    // TODO: FIXME: run srs.
+    return ret;
+}
+
+int dlp_fork_workers(int workers, vector<int>& pids)
+{
+    int ret = ERROR_SUCCESS;
+    
+    for (int i = 0; i < workers; i++) {
+        pid_t pid = -1;
+        
+        // TODO: fork or vfork?
+        if ((pid = fork()) < 0) {
+            ret = ERROR_FORK_WORKER;
+            dlp_error("vfork process failed. ret=%d", ret);
+            return ret;
+        }
+        
+        // child process: worker proxy engine.
+        if (pid == 0) {
+            ret = dlp_run_proxyer();
+            exit(ret);
+        }
+        
+        pids.push_back(pid);
+        dlp_trace("dolphin fork worker pid=%d", pid);
+    }
+    
+    return ret;
+}
+
+int dlp_fork_srs(vector<int> rtmp_ports, string binary, string conf, vector<int>& pids)
+{
+    int ret = ERROR_SUCCESS;
+    
+    for (int i = 0; i < (int)rtmp_ports.size(); i++) {
+        pid_t pid = -1;
+        int rtmp_port = rtmp_ports.at(i);
+        
+        // TODO: fork or vfork?
+        if ((pid = fork()) < 0) {
+            ret = ERROR_FORK_WORKER;
+            dlp_error("vfork process failed. ret=%d", ret);
+            return ret;
+        }
+        
+        // child process: worker SRS engine.
+        if (pid == 0) {
+            ret = dlp_run_srs(rtmp_port, binary, conf);
+            exit(ret);
+        }
+        
+        pids.push_back(pid);
+        dlp_trace("dolphin fork srs pid=%d, listen=%d, binary=%s, conf=%s", pid, rtmp_port, binary.c_str(), conf.c_str());
+    }
+    
+    return ret;
+}
+
 int main(int argc, char** argv)
 {
+    int ret = ERROR_SUCCESS;
     printf("srs-dolphin %s is a MultipleProcess for SRS, copyright (c) 2015 %s\n", DLP_VERSION, DLP_AUTHORS);
     
     // default params.
@@ -143,6 +240,23 @@ int main(int argc, char** argv)
     dlp_trace("dolphin start srs to listen at %s", srs_service_ports.c_str());
     dlp_trace("dolphin use srs binary at %s", srs_binary.c_str());
     dlp_trace("dolphin use config file %s for srs", srs_config_file.c_str());
+    
+    std:vector<int> rtmp_fds;
+    std::vector<int> rtmp_proxy_ports = dlp_list_to_ints(dlp_proxy_ports);
+    if ((ret = dlp_listen_rtmp(rtmp_proxy_ports, rtmp_fds)) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
+    std::vector<int> worker_pids;
+    if ((ret = dlp_fork_workers(dlp_worker_process, worker_pids)) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
+    std::vector<int> srs_pids;
+    std::vector<int> rtmp_service_ports = dlp_list_to_ints(srs_service_ports);
+    if ((ret = dlp_fork_srs(rtmp_service_ports, srs_binary, srs_config_file, worker_pids)) != ERROR_SUCCESS) {
+        return ret;
+    }
     
     dlp_trace("dolphin terminated.");
     return 0;
