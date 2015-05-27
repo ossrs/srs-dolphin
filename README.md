@@ -18,6 +18,49 @@ Remark:
 1. **Manual** Deploy of srs-sharp: User should manually deply the SRS edge, then start srs-sharp to proxy the ports of SRS.
 1. **Auto** Deploy of srs-dolphin: User only need to start srs-dophin, which will auto manage the SRS.
 
+## Usage
+
+** Step 1: ** Prepare SRS:
+
+```
+cd ~ && git clone https://github.com/simple-rtmp-server/srs.git &&
+cd ~/srs/trunk && ./configure --with-ffmpeg && make && ./objs/srs -c conf/srs.conf
+```
+
+** Step 2: ** Clone the srs-dolphin:
+
+```
+cd ~ && git clone https://github.com/simple-rtmp-server/srs-dolphin.git
+```
+
+** Step 3: ** Build the srs-dolphin:
+
+```
+cd ~/srs-dolphin/trunk && make
+```
+
+** Step 4: ** Run dolphin
+
+```
+cd ~/srs-dolphin/trunk && 
+./objs/srs_dolphin -p 19350 -w 4 -s 1936,1937,1938,1939 -b ../../srs/trunk/objs/srs -c conf/srs.conf
+```
+
+** Step 5: ** Publish stream
+
+```
+cd ~/srs/trunk &&
+./objs/ffmpeg/bin/ffmpeg -re -i ./doc/source.200kbps.768x320.flv \
+    -vcodec copy -acodec copy -f flv -y rtmp://127.0.0.1:1935/live/livestream
+```
+
+** Step 6: ** Play stream
+
+```
+Origin SRS stream: rtmp://127.0.0.1:1935/live/livestream
+Edge Dolphin stream: rtmp://127.0.0.1:19350/live/livestream
+```
+
 Winlin 2015.5
 
 [SRS]: https://github.com/simple-rtmp-server/srs

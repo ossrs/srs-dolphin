@@ -12,6 +12,7 @@
 		3CC7535D1B15F13B00481266 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 3CC7535C1B15F13B00481266 /* Makefile */; };
 		3CC753621B16195300481266 /* dlp_core_proxy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CC7535E1B16195300481266 /* dlp_core_proxy.cpp */; };
 		3CC753631B16195300481266 /* dlp_core_srs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3CC753601B16195300481266 /* dlp_core_srs.cpp */; };
+		3CC753651B161AB800481266 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 3CC753641B161AB800481266 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +37,7 @@
 		3CC7535F1B16195300481266 /* dlp_core_proxy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = dlp_core_proxy.hpp; path = ../../../src/core/dlp_core_proxy.hpp; sourceTree = "<group>"; };
 		3CC753601B16195300481266 /* dlp_core_srs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_core_srs.cpp; path = ../../../src/core/dlp_core_srs.cpp; sourceTree = "<group>"; };
 		3CC753611B16195300481266 /* dlp_core_srs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = dlp_core_srs.hpp; path = ../../../src/core/dlp_core_srs.hpp; sourceTree = "<group>"; };
+		3CC753641B161AB800481266 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../../../../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +70,7 @@
 		3C15C7181B15EBA2000B8A9A /* dolphin */ = {
 			isa = PBXGroup;
 			children = (
+				3CC753641B161AB800481266 /* README.md */,
 				3CC7535C1B15F13B00481266 /* Makefile */,
 				3C5814901B15EC4500980A53 /* core */,
 				3C58148F1B15EC3F00980A53 /* main */,
@@ -152,6 +155,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CC753651B161AB800481266 /* README.md in Sources */,
 				3CC753621B16195300481266 /* dlp_core_proxy.cpp in Sources */,
 				3CC7535D1B15F13B00481266 /* Makefile in Sources */,
 				3C5814931B15EC6500980A53 /* dlp_main_server.cpp in Sources */,
