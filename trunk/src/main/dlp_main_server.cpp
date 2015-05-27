@@ -159,12 +159,13 @@ int dlp_listen_rtmp(vector<int> ports, vector<int>& fds)
         }
         
         dlp_info("dolphin serve at tcp://%d", port);
+        fds.push_back(fd);
     }
     
     return ret;
 }
 
-int dlp_fork_workers(int workers, vector<int>& pids)
+int dlp_fork_workers(vector<int> fds, int workers, vector<int>& pids)
 {
     int ret = ERROR_SUCCESS;
     
@@ -180,7 +181,8 @@ int dlp_fork_workers(int workers, vector<int>& pids)
         
         // child process: worker proxy engine.
         if (pid == 0) {
-            ret = dlp_run_proxyer();
+            // TODO: FIXME: support multiple ports.
+            ret = dlp_run_proxyer(fds.at(0));
             exit(ret);
         }
         
@@ -222,6 +224,7 @@ int dlp_fork_srs(vector<int> rtmp_ports, string binary, string conf, vector<int>
 int main(int argc, char** argv)
 {
     int ret = ERROR_SUCCESS;
+    
     printf("srs-dolphin %s is a MultipleProcess for SRS, copyright (c) 2015 %s\n", DLP_VERSION, DLP_AUTHORS);
     
     // default params.
@@ -253,7 +256,7 @@ int main(int argc, char** argv)
     
     // fork all workers.
     std::vector<int> worker_pids;
-    if ((ret = dlp_fork_workers(dlp_worker_process, worker_pids)) != ERROR_SUCCESS) {
+    if ((ret = dlp_fork_workers(rtmp_fds, dlp_worker_process, worker_pids)) != ERROR_SUCCESS) {
         return ret;
     }
     

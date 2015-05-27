@@ -39,6 +39,7 @@ using namespace std;
 #include <st.h>
 
 bool st_initilaized = false;
+int dlp_master_id = getpid();
 std::map<st_thread_t, int> cache;
 
 int dlp_generate_id()

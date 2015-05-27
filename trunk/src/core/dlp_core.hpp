@@ -65,11 +65,12 @@
 #include <unistd.h>
 extern int dlp_generate_id();
 extern int dlp_get_id();
-#define dlp_verbose(msg, ...) printf("[verbose][%d][%d] ", getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
-#define dlp_info(msg, ...) printf("[info][%d][%d] ", getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
-#define dlp_trace(msg, ...) printf("[trace][%d][%d] ", getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
-#define dlp_warn(msg, ...) printf("[warn][%d][%d] ", getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
-#define dlp_error(msg, ...) printf("[error][%d][%d] ", getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+extern int dlp_master_id;
+#define dlp_verbose(msg, ...) printf("[verbose][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_info(msg, ...) printf("[info][%d][%d][%d] ", dlp_master_id,getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_trace(msg, ...) printf("[trace][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_warn(msg, ...) printf("[warn][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_error(msg, ...) printf("[error][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
 
 // errors.
 
