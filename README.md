@@ -15,8 +15,8 @@ The [srs-sharp][SHARP] is a similar project, but srs-sharp is a HTTP FLV reverse
 
 Remark:
 
-1. Manual Deploy of srs-sharp: User should manually deply the SRS edge, then start srs-sharp to proxy the ports of SRS.
-1. Auto Deploy of srs-dolphin: User only need to start srs-dophin, which will auto manage the SRS.
+1. **Manual** Deploy of srs-sharp: User should manually deply the SRS edge, then start srs-sharp to proxy the ports of SRS.
+1. **Auto** Deploy of srs-dolphin: User only need to start srs-dophin, which will auto manage the SRS.
 
 Winlin 2015.5
 
