@@ -1,4 +1,4 @@
-.PHONY: default help dolphin clean
+.PHONY: default help dolphin clean prepare tips
 
 SRC=src
 OBJS=objs
@@ -19,7 +19,11 @@ help:
 	@echo "     make"
 	@echo "     make dolphin"
 
-dolphin: prepare $(OBJS)/srs_dolphin
+dolphin: prepare $(OBJS)/srs_dolphin tips
+
+tips:
+	@echo "srs-dolphin build ok, you can:"
+	@echo "    ./$(OBJS)/srs_dolphin"
 
 prepare:
 	@mkdir -p $(OBJS)
@@ -34,11 +38,12 @@ $(OBJS)/srs_dolphin: $(ST_LIB) $(OBJS)/core/dlp_core.o $(OBJS)/main/dlp_main_ser
 	$(LINK) -o $(OBJS)/srs_dolphin $(OBJS)/core/dlp_core.o $(OBJS)/main/dlp_main_server.o $(ST_LIB)
 
 $(ST_LIB):
-	unzip -q 3rdparty/st-1.9.zip -d objs/
+	rm -rf $(OBJS)/st-1.9
+	unzip -q 3rdparty/st-1.9.zip -d $(OBJS)/
 ifeq ($(shell uname -s |grep Darwin > /dev/null 2>&1  && echo yes), yes)
-	make -C objs/st-1.9 darwin-debug
+	make -C $(OBJS)/st-1.9 darwin-debug
 else
-	make -C objs/st-1.9 linux-debug
+	make -C $(OBJS)/st-1.9 linux-debug
 endif
 
 CORE_INCS=-I$(SRC)/core $(ST_INCS)
