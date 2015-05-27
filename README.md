@@ -27,31 +27,26 @@ cd ~ && git clone https://github.com/simple-rtmp-server/srs.git &&
 cd ~/srs/trunk && ./configure --with-ffmpeg && make && ./objs/srs -c conf/srs.conf
 ```
 
+Remark: We clone the SRS and Dolphin to user home, user can specifies others.
+
 **Step 2:** Clone the srs-dolphin:
 
 ```
 cd ~ && git clone https://github.com/simple-rtmp-server/srs-dolphin.git
 ```
 
-**Step 3:** Build the srs-dolphin:
+**Step 3:** Build and run the srs-dolphin:
 
 ```
-cd ~/srs-dolphin/trunk && make
-```
-
-**Step 4:** Run dolphin
-
-```
-cd ~/srs-dolphin/trunk && 
+cd ~/srs-dolphin/trunk && make && 
 ./objs/srs_dolphin -p 19350 -w 4 -s 1936,1937,1938,1939 \
     -b ../../srs/trunk/objs/srs -c conf/dolphin.conf
 ```
 
-Remark: User can specifies the SRS in other valid path.
-
+Remark: User can specifies the SRS in other valid path.<br/>
 Remark: The conf/dolphin.conf is a default conf for SRS by dolphin, user can use others.
 
-**Step 5:** Publish stream
+**Step 4:** Publish stream
 
 ```
 cd ~/srs/trunk &&
@@ -59,12 +54,14 @@ cd ~/srs/trunk &&
     -vcodec copy -acodec copy -f flv -y rtmp://127.0.0.1:1935/live/livestream
 ```
 
-**Step 6:** Play stream
+**Step 5:** Play stream
 
 ```
 Origin SRS stream: rtmp://127.0.0.1:1935/live/livestream
 Edge Dolphin stream: rtmp://127.0.0.1:19350/live/livestream
 ```
+
+Remark: User can use [SB][SB] to do the benchmark.
 
 ## Features
 
@@ -77,3 +74,4 @@ Winlin 2015.5
 [SRS]: https://github.com/simple-rtmp-server/srs
 [ARCH]: https://github.com/simple-rtmp-server/srs/wiki/v3_CN_Architecture#multiple-processes-planb
 [SHARP]: https://github.com/simple-rtmp-server/go-sharp
+[SB]: https://github.com/simple-rtmp-server/srs-bench
