@@ -38,5 +38,10 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
     dlp_trace("dolphin srs serve port %d", rtmp_port);
     
     // TODO: FIXME: run srs.
+    for (;;) {
+        dlp_verbose("srs proecess serve at port %d", rtmp_port);
+        st_sleep(3);
+    }
+    
     return ret;
 }

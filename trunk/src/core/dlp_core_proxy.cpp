@@ -38,5 +38,10 @@ int dlp_run_proxyer(int port, int fd)
     dlp_trace("dolphin worker serve port=%d, fd=%d", port, fd);
     
     // TODO: FIXME: run worker to proxy SRS.
+    for (;;) {
+        dlp_verbose("worker proecess serve at port %d", port);
+        st_sleep(3);
+    }
+    
     return ret;
 }
