@@ -63,7 +63,9 @@ Edge Dolphin stream: rtmp://127.0.0.1:19350/live/livestream
 
 ## Features
 
-1. [dev] Multiple Processes for SRS edge, devliery in RTMP/HTTP-FLV.
+1. [dev] Multiple Processes for SRS edge.
+1. [dev] Delivery stream in RTMP.
+1. [dev] Delivery stream in HTTP FLV.
 
 Winlin 2015.5
 
