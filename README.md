@@ -39,9 +39,9 @@ cd ~ && git clone https://github.com/simple-rtmp-server/srs-dolphin.git
 
 ```
 cd ~/srs-dolphin/trunk && make && 
-./objs/srs_dolphin -w 4 -p 19350 \
+./objs/srs_dolphin -w 4 -p 19350 -x 8088 \
     -b ~/srs/trunk/objs/srs -c conf/dolphin.conf \
-    -s 1936,1937,1938,1939
+    -s 1936,1937,1938,1939 -y 8081,8082,8083,8084
 ```
 
 Remark: User can specifies the SRS in other valid path.<br/>
