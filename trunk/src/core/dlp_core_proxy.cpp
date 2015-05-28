@@ -139,14 +139,15 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     DlpStSocket skt_client(stfd);
     DlpStSocket skt_srs(srs);
     
-    skt_client.set_recv_timeout(300 * 1000);
-    skt_srs.set_recv_timeout(1500 * 1000);
+    skt_client.set_recv_timeout(0);
+    skt_srs.set_recv_timeout(500 * 1000);
     
     char buf[4096];
     for (;;) {
-        // proxy client ==> srs.
         ssize_t nread = 0;
-        for (;;) {
+        
+        // proxy client ==> srs.
+        if (true) {
             nread = 0;
             
             if ((ret = skt_client.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
@@ -155,17 +156,13 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
                 }
             }
             
-            if (nread <= 0) {
-                break;
-            }
-            
-            if ((ret = skt_srs.write(buf, nread, NULL)) != ERROR_SUCCESS) {
+            if (nread > 0 && (ret = skt_srs.write(buf, nread, NULL)) != ERROR_SUCCESS) {
                 return ret;
             }
         }
         
         // proxy srs ==> client
-        for (;;) {
+        if (true) {
             nread = 0;
             
             if ((ret = skt_srs.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
@@ -174,11 +171,7 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
                 }
             }
             
-            if (nread <= 0) {
-                break;
-            }
-            
-            if ((ret = skt_client.write(buf, nread, NULL)) != ERROR_SUCCESS) {
+            if (nread > 0 && (ret = skt_client.write(buf, nread, NULL)) != ERROR_SUCCESS) {
                 return ret;
             }
         }
