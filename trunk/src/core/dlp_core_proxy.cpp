@@ -27,11 +27,69 @@ using namespace std;
 
 #include <st.h>
 
-int dlp_proxy(st_netfd_t stfd)
+DlpProxyContext::DlpProxyContext()
+{
+    _port = -1;
+    _fd = -1;
+}
+
+DlpProxyContext::~DlpProxyContext()
+{
+    ::close(_fd);
+}
+
+int DlpProxyContext::initialize(int p, int f, vector<int> sps)
 {
     int ret = ERROR_SUCCESS;
     
-    int fd = st_netfd_fileno(stfd);
+    _port = p;
+    _fd = f;
+    sports = sps;
+    
+    return ret;
+}
+
+int DlpProxyContext::fd()
+{
+    return _fd;
+}
+
+int DlpProxyContext::port()
+{
+    return _port;
+}
+
+DlpProxyConnection::DlpProxyConnection()
+{
+    context = NULL;
+    stfd = NULL;
+}
+
+DlpProxyConnection::~DlpProxyConnection()
+{
+    dlp_close_stfd(stfd);
+}
+
+int DlpProxyConnection::initilaize(DlpProxyContext* c, st_netfd_t s)
+{
+    int ret = ERROR_SUCCESS;
+    
+    context = c;
+    stfd = s;
+    
+    return ret;
+}
+
+int DlpProxyConnection::fd()
+{
+    return st_netfd_fileno(stfd);
+}
+
+int dlp_proxy(DlpProxyConnection* conn)
+{
+    int ret = ERROR_SUCCESS;
+    
+    int fd = conn->fd();
     std::string ip = dlp_get_peer_ip(fd);
     dlp_trace("woker serve fd=%d, %s", fd, ip.c_str());
     
@@ -45,38 +103,37 @@ int dlp_proxy(st_netfd_t stfd)
 
 void* dlp_proxy_pfn(void* arg)
 {
-    st_netfd_t stfd = (st_netfd_t)arg;
+    DlpProxyConnection* conn = (DlpProxyConnection*)arg;
+    dlp_assert(conn);
     
     int ret = ERROR_SUCCESS;
-    if ((ret = dlp_proxy(stfd)) != ERROR_SUCCESS) {
-        dlp_warn("worker proxy failed, ret=%d", ret);
+    if ((ret = dlp_proxy(conn)) != ERROR_SUCCESS) {
+        dlp_warn("worker proxy connection failed, ret=%d", ret);
     } else {
-        dlp_trace("worker proxy completed.");
+        dlp_trace("worker proxy connection completed.");
     }
+    
+    dlp_freep(conn);
     
     return NULL;
 }
 
-int dlp_run_proxyer(int port, int fd)
+int dlp_run_proxyer_for(DlpProxyContext* context)
 {
     int ret = ERROR_SUCCESS;
     
-    if ((ret = dlp_st_init()) != ERROR_SUCCESS) {
-        return ret;
-    }
-    
-    dlp_trace("dolphin worker serve port=%d, fd=%d", port, fd);
+    dlp_trace("dolphin worker serve port=%d, fd=%d", context->port(), context->fd());
     
     st_netfd_t stfd = NULL;
-    if ((stfd = st_netfd_open_socket(fd)) == NULL) {
+    if ((stfd = st_netfd_open_socket(context->fd())) == NULL) {
         ret = ERROR_ST_OPEN_FD;
         dlp_error("worker open stfd failed. ret=%d", ret);
         return ret;
     }
-    dlp_info("worker open fd ok, fd=%d", fd);
+    dlp_info("worker open fd ok, fd=%d", context->fd());
     
     for (;;) {
-        dlp_verbose("worker proecess serve at port %d", port);
+        dlp_verbose("worker proecess serve at port %d", context->port());
         st_netfd_t cfd = NULL;
         
         if ((cfd = st_accept(stfd, NULL, NULL, ST_UTIME_NO_TIMEOUT)) == NULL) {
@@ -84,12 +141,70 @@ int dlp_run_proxyer(int port, int fd)
             continue;
         }
         
+        DlpProxyConnection* conn = new DlpProxyConnection();
+        if ((ret = conn->initilaize(context, cfd)) != ERROR_SUCCESS) {
+            return ret;
+        }
+        
         st_thread_t trd = NULL;
-        if ((trd = st_thread_create(dlp_proxy_pfn, cfd, 0, 0)) == NULL) {
+        if ((trd = st_thread_create(dlp_proxy_pfn, conn, 0, 0)) == NULL) {
+            dlp_freep(conn);
+            
             dlp_warn("ignore worker thread create error.");
             continue;
         }
     }
+    
+    return ret;
+}
+
+void* dlp_run_proxyer_pfn(void* arg)
+{
+    DlpProxyContext* context = (DlpProxyContext*)arg;
+    dlp_assert(context);
+    
+    int ret = ERROR_SUCCESS;
+    if ((ret = dlp_run_proxyer_for(context)) != ERROR_SUCCESS) {
+        dlp_warn("worker proxy context failed, ret=%d", ret);
+    } else {
+        dlp_trace("worker proxy context completed.");
+    }
+    
+    dlp_freep(context);
+    
+    return NULL;
+}
+
+int dlp_run_proxyer(vector<int> ports, std::vector<int> fds, std::vector<int> sports)
+{
+    int ret = ERROR_SUCCESS;
+    
+    if ((ret = dlp_st_init()) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
+    dlp_assert(ports.size() == fds.size());
+    for (int i = 0; i < (int)ports.size(); i++) {
+        int port = ports.at(i);
+        int fd = fds.at(i);
+        
+        DlpProxyContext* context = new DlpProxyContext();
+        if ((ret = context->initialize(port, fd, sports)) != ERROR_SUCCESS) {
+            dlp_freep(context);
+            return ret;
+        }
+        
+        st_thread_t trd = NULL;
+        if ((trd = st_thread_create(dlp_run_proxyer_pfn, context, 0, 0)) == NULL) {
+            dlp_freep(context);
+            
+            ret = ERROR_ST_TRHEAD;
+            dlp_warn("worker thread create error. ret=%d", ret);
+            return ret;
+        }
+    }
+    
+    st_thread_exit(NULL);
     
     return ret;
 }

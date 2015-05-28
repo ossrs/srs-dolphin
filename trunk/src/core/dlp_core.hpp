@@ -46,7 +46,7 @@
 #include <inttypes.h>
 
 #include <assert.h>
-#define srs_assert(expression) assert(expression)
+#define dlp_assert(expression) assert(expression)
 
 #include <stddef.h>
 #include <sys/types.h>
@@ -80,13 +80,16 @@ extern int dlp_master_id;
 #define ERROR_FORK_WORKER       1001
 #define ERROR_ST_INITIALIZE     1002
 #define ERROR_ST_OPEN_FD        1003
+#define ERROR_ST_TRHEAD         1004
 
 // utilies.
 #include <string>
 #include <vector>
+#include <st.h>
 extern std::vector<int> dlp_list_to_ints(std::string str_list);
 extern int dlp_listen_tcp(int port, int& fd);
 extern int dlp_st_init();
 extern std::string dlp_get_peer_ip(int fd);
+extern void dlp_close_stfd(st_netfd_t& stfd);
 
 #endif

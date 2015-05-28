@@ -165,7 +165,7 @@ int dlp_listen_rtmp(vector<int> ports, vector<int>& fds)
     return ret;
 }
 
-int dlp_fork_workers(vector<int> ports, vector<int> fds, int workers, vector<int>& pids)
+int dlp_fork_workers(vector<int> ports, vector<int> fds, int workers, vector<int>& pids, vector<int> sports)
 {
     int ret = ERROR_SUCCESS;
     
@@ -181,8 +181,7 @@ int dlp_fork_workers(vector<int> ports, vector<int> fds, int workers, vector<int
         
         // child process: worker proxy engine.
         if (pid == 0) {
-            // TODO: FIXME: support multiple ports.
-            ret = dlp_run_proxyer(ports.at(0), fds.at(0));
+            ret = dlp_run_proxyer(ports, fds, sports);
             exit(ret);
         }
         
@@ -247,22 +246,23 @@ int main(int argc, char** argv)
     dlp_trace("dolphin use srs binary at %s", srs_binary.c_str());
     dlp_trace("dolphin use config file %s for srs", srs_config_file.c_str());
     
+    std::vector<int> rtmp_service_ports = dlp_list_to_ints(srs_service_ports);
+    std::vector<int> rtmp_proxy_ports = dlp_list_to_ints(dlp_proxy_ports);
+    
     // listen the serve socket for workers.
     std:vector<int> rtmp_fds;
-    std::vector<int> rtmp_proxy_ports = dlp_list_to_ints(dlp_proxy_ports);
     if ((ret = dlp_listen_rtmp(rtmp_proxy_ports, rtmp_fds)) != ERROR_SUCCESS) {
         return ret;
     }
     
     // fork all workers.
     std::vector<int> worker_pids;
-    if ((ret = dlp_fork_workers(rtmp_proxy_ports, rtmp_fds, dlp_worker_process, worker_pids)) != ERROR_SUCCESS) {
+    if ((ret = dlp_fork_workers(rtmp_proxy_ports, rtmp_fds, dlp_worker_process, worker_pids, rtmp_service_ports)) != ERROR_SUCCESS) {
         return ret;
     }
     
     // fork all srs servers.
     std::vector<int> srs_pids;
-    std::vector<int> rtmp_service_ports = dlp_list_to_ints(srs_service_ports);
     if ((ret = dlp_fork_srs(rtmp_service_ports, srs_binary, srs_config_file, srs_pids)) != ERROR_SUCCESS) {
         return ret;
     }

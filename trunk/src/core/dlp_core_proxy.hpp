@@ -30,6 +30,38 @@
 
 #include <dlp_core.hpp>
 
-extern int dlp_run_proxyer(int port, int fd);
+#include <vector>
+
+#include <st.h>
+
+class DlpProxyContext
+{
+private:
+    int _port;
+    int _fd;
+    std::vector<int> sports;
+public:
+    DlpProxyContext();
+    virtual ~DlpProxyContext();
+public:
+    virtual int initialize(int p, int f, std::vector<int> sps);
+    virtual int fd();
+    virtual int port();
+};
+
+class DlpProxyConnection
+{
+private:
+    DlpProxyContext* context;
+    st_netfd_t stfd;
+public:
+    DlpProxyConnection();
+    virtual ~DlpProxyConnection();
+public:
+    virtual int initilaize(DlpProxyContext* c, st_netfd_t s);
+    virtual int fd();
+};
+
+extern int dlp_run_proxyer(std::vector<int> ports, std::vector<int> fds, std::vector<int> sports);
 
 #endif
