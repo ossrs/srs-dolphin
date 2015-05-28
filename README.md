@@ -11,7 +11,7 @@ The [srs-sharp][SHARP] is a similar project, but srs-sharp is a HTTP FLV reverse
 |   Project   |   Goal        |   Protocol    |   Performance   |   Deploy    |
 |   -------   |   -----       |   --------    |   -----------   |   -------   |
 |   srs-sharp | HTTP-FLV      |   HTTP        |   10k, 300%CPU  |   Manual(*) |
-| srs-dolphin | RTMP/HTTP-FLV |   TCP         |   -             |   Auto(*)   |
+| srs-dolphin | RTMP/HTTP-FLV |   TCP         |   20k, 320%CPU  |   Auto(*)   |
 
 Remark:
 
@@ -67,8 +67,8 @@ Remark: User can use [SB][SB] to do the benchmark.
 
 ## Features
 
-1. [dev] Multiple Processes for SRS edge.
-1. [dev] Delivery stream in RTMP.
+1. Multiple Processes for SRS edge.
+1. Delivery stream in RTMP.
 1. [dev] Delivery stream in HTTP FLV.
 1. [dev] Support HTTP API for Multiple Processes.
 1. [dev] Muktiple Processes for SRS origin.

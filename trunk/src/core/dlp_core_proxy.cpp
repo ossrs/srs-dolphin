@@ -184,6 +184,7 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     DlpStSocket skt_client(stfd);
     DlpStSocket skt_srs(srs);
     
+    // TODO: FIXME: check whether 2thread to read write the stfd is ok.
     char buf[4096];
     while (!rc.terminated) {
         ssize_t nread = 0;
@@ -221,6 +222,7 @@ int DlpProxyConnection::proxy_recv(DlpProxyRecvContext* rc)
     rc->cycle = true;
     rc->terminated = false;
     
+    // TODO: FIXME: check whether 2thread to read write the stfd is ok.
     char buf[1024];
     while (rc->cycle) {
         ssize_t nread = 0;
