@@ -42,13 +42,22 @@ int dlp_fork_srs(int rtmp_port, string binary, string conf)
     }
     
     // params for srs.
-    std::string argv0 = "-c";
-    std::string argv1 = conf;
+    std::string argv0 = binary;
+    std::string argv1 = "-c";
+    std::string argv2 = conf;
+    std::string argv3 = "-p";
+    char argv4[10];
+    snprintf(argv4, sizeof(argv4), "%d", rtmp_port);
     
-    char** argv = new char*[2 + 1];
+    char** argv = new char*[5 + 1];
     argv[0] = (char*)argv0.data();
     argv[1] = (char*)argv1.data();
-    argv[2] = NULL;
+    argv[2] = (char*)argv2.data();
+    argv[3] = (char*)argv3.data();
+    argv[4] = (char*)argv4;
+    argv[5] = NULL;
+    
+    dlp_trace("exec srs: %s %s %s %s %s", argv[0], argv[1], argv[2], argv[3], argv[4]);
     
     // TODO: execv or execvp
     ret = execv(binary.data(), argv);

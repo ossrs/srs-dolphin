@@ -255,15 +255,15 @@ int main(int argc, char** argv)
         return ret;
     }
     
-    // fork all workers.
-    std::vector<int> worker_pids;
-    if ((ret = dlp_fork_workers(rtmp_proxy_ports, rtmp_fds, dlp_worker_process, worker_pids, rtmp_service_ports)) != ERROR_SUCCESS) {
-        return ret;
-    }
-    
     // fork all srs servers.
     std::vector<int> srs_pids;
     if ((ret = dlp_fork_srs(rtmp_service_ports, srs_binary, srs_config_file, srs_pids)) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
+    // fork all workers.
+    std::vector<int> worker_pids;
+    if ((ret = dlp_fork_workers(rtmp_proxy_ports, rtmp_fds, dlp_worker_process, worker_pids, rtmp_service_ports)) != ERROR_SUCCESS) {
         return ret;
     }
     
