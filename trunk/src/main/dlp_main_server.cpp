@@ -307,6 +307,16 @@ int main(int argc, char** argv)
         usleep(DLP_CYCLE_TIEOUT_MS * 1000);
     }
     
+    // killall others.
+    for (int i = 0; i < (int)worker_pids.size(); i++) {
+        int pid = worker_pids.at(i);
+        kill(pid, SIGKILL);
+    }
+    for (int i = 0; i < (int)srs_pids.size(); i++) {
+        int pid = srs_pids.at(i);
+        kill(pid, SIGKILL);
+    }
+    
     dlp_trace("dolphin terminated.");
     return 0;
 }

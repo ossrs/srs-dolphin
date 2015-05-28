@@ -28,12 +28,26 @@ using namespace std;
 
 #include <st.h>
 
+void* dlp_connection_read_pfn(void* arg);
+
 DlpProxyServer::DlpProxyServer()
 {
     load = 0;
 }
 
 DlpProxyServer::~DlpProxyServer()
+{
+}
+
+DlpProxyRecvContext::DlpProxyRecvContext()
+{
+    conn = NULL;
+    srs = NULL;
+    cycle = false;
+    terminated = false;
+}
+
+DlpProxyRecvContext::~DlpProxyRecvContext()
 {
 }
 
@@ -149,58 +163,74 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
 {
     int ret = ERROR_SUCCESS;
     
+    // create recv thread.
+    DlpProxyRecvContext rc;
+    rc.srs = srs;
+    rc.conn = this;
+    rc.cycle = false;
+    
+    st_thread_t trd = NULL;
+    if ((trd = st_thread_create(dlp_connection_read_pfn, &rc, 1, 0)) == NULL) {
+        ret = ERROR_ST_TRHEAD;
+        dlp_error("create connection recv thread failed. ret=%d", ret);
+        return ret;
+    }
+    
+    // wait for thread to start.
+    while (!rc.cycle) {
+        st_usleep(100 * 1000);
+    }
+    
     DlpStSocket skt_client(stfd);
     DlpStSocket skt_srs(srs);
     
-    //skt_client.set_recv_timeout(0);
-    //skt_srs.set_recv_timeout(500 * 1000);
-    
-    pollfd pds[2];
-    pds[0].fd = st_netfd_fileno(stfd);
-    pds[0].events = POLLIN;
-    pds[1].fd = st_netfd_fileno(srs);
-    pds[1].events = POLLIN;
-    
     char buf[4096];
-    ssize_t nread = 0;
-        
-    // TODO: FIXME: refine performance, use poll or writev.
-    for (;;) {
-        // check which is active.
-        pds[0].revents = 0;
-        pds[1].revents = 0;
-        if (st_poll(pds, 2, ST_UTIME_NO_TIMEOUT) <= 0) {
-            break;
+    while (!rc.terminated) {
+        ssize_t nread = 0;
+        if ((ret = skt_srs.read(buf, 1024, &nread)) != ERROR_SUCCESS) {
+            return ret;
         }
+        dlp_assert(nread > 0);
         
-        // proxy client ==> srs.
-        if (pds[0].revents & POLLIN) {
-            nread = 0;
-            
-            if ((ret = skt_client.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
-                if (ret != ERROR_SOCKET_TIMEOUT) {
-                    return ret;
-                }
-            }
-            
-            if (nread > 0 && (ret = skt_srs.write(buf, nread, NULL)) != ERROR_SUCCESS) {
-                return ret;
-            }
+        if ((ret = skt_client.write(buf, nread, NULL)) != ERROR_SUCCESS) {
+            return ret;
         }
+    }
+    
+    // terminate thread.
+    rc.cycle = false;
+    st_thread_interrupt(trd);
+    st_thread_join(trd, NULL);
+    
+    // wait for thread to quit.
+    while (!rc.terminated) {
+        st_usleep(100 * 1000);
+    }
+    
+    return ret;
+}
+
+int DlpProxyConnection::proxy_recv(DlpProxyRecvContext* rc)
+{
+    int ret = ERROR_SUCCESS;
+    
+    DlpStSocket skt_client(stfd);
+    DlpStSocket skt_srs(rc->srs);
+    
+    // notify the main thread we are ready.
+    rc->cycle = true;
+    rc->terminated = false;
+    
+    char buf[1024];
+    while (rc->cycle) {
+        ssize_t nread = 0;
+        if ((ret = skt_client.read(buf, 1024, &nread)) != ERROR_SUCCESS) {
+            return ret;
+        }
+        dlp_assert(nread > 0);
         
-        // proxy srs ==> client
-        if (pds[1].revents & POLLIN) {
-            nread = 0;
-            
-            if ((ret = skt_srs.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
-                if (ret != ERROR_SOCKET_TIMEOUT) {
-                    return ret;
-                }
-            }
-            
-            if (nread > 0 && (ret = skt_client.write(buf, nread, NULL)) != ERROR_SUCCESS) {
-                return ret;
-            }
+        if ((ret = skt_srs.write(buf, nread, NULL)) != ERROR_SUCCESS) {
+            return ret;
         }
     }
     
@@ -236,6 +266,24 @@ int dlp_connection_proxy(DlpProxyConnection* conn)
     dlp_close_stfd(stfd);
     
     return ret;
+}
+
+void* dlp_connection_read_pfn(void* arg)
+{
+    DlpProxyRecvContext* rc = (DlpProxyRecvContext*)arg;
+    
+    int ret = ERROR_SUCCESS;
+    if ((ret = rc->conn->proxy_recv(rc)) != ERROR_SUCCESS) {
+        dlp_warn("worker proxy connection recv failed, ret=%d", ret);
+    } else {
+        dlp_trace("worker proxy connection recv completed.");
+    }
+    
+    // terminated.
+    rc->cycle = false;
+    rc->terminated = true;
+    
+    return NULL;
 }
 
 void* dlp_connection_pfn(void* arg)

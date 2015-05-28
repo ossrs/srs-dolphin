@@ -89,6 +89,7 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
     }
     
     // parent.
+    // TODO: FIXME: we must manage these srs processes.
     dlp_trace("fork srs pid=%d, port=%d, binary=%s, conf=%s", pid, rtmp_port, binary.c_str(), conf.c_str());
     
     for (;;) {

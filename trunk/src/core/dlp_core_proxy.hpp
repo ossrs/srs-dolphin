@@ -34,6 +34,8 @@
 
 #include <st.h>
 
+class DlpProxyConnection;
+
 struct DlpProxySrs
 {
     int port;
@@ -46,6 +48,16 @@ struct DlpProxyServer
     
     DlpProxyServer();
     virtual ~DlpProxyServer();
+};
+
+struct DlpProxyRecvContext
+{
+    DlpProxyConnection* conn;
+    st_netfd_t srs;
+    bool cycle;
+    bool terminated;
+    DlpProxyRecvContext();
+    virtual ~DlpProxyRecvContext();
 };
 
 class DlpProxyContext
@@ -79,6 +91,7 @@ public:
     virtual DlpProxyContext* context();
     virtual int fd();
     virtual int proxy(st_netfd_t srs);
+    virtual int proxy_recv(DlpProxyRecvContext* rc);
 };
 
 extern int dlp_run_proxyer(std::vector<int> ports, std::vector<int> fds, std::vector<int> sports);
