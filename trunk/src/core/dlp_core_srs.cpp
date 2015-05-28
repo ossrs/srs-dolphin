@@ -23,6 +23,10 @@
 
 #include <dlp_core_srs.hpp>
 
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 using namespace std;
 
 #include <st.h>

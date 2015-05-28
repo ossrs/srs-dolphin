@@ -23,6 +23,7 @@
 
 #include <dlp_core_proxy.hpp>
 
+#include <algorithm>
 using namespace std;
 
 #include <st.h>
