@@ -45,7 +45,8 @@ cd ~/srs-dolphin/trunk && make &&
 ```
 
 Remark: User can specifies the SRS in other valid path.<br/>
-Remark: The conf/dolphin.conf is a default conf for SRS by dolphin, user can use others.
+Remark: The conf/dolphin.conf is a default conf for SRS by dolphin, user can use others.<br/>
+Remark: Use the command to test your config for SRS in dolphin mode `~/srs/trunk/objs/srs -c conf/dolphin.conf -p 19350 -x 8088`, it's ok when your SRS start normally.
 
 **Step 4:** Publish stream
 
