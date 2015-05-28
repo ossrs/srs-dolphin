@@ -63,14 +63,15 @@
 // log.
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 extern int dlp_generate_id();
 extern int dlp_get_id();
 extern int dlp_master_id;
 #define dlp_verbose(msg, ...) printf("[verbose][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
 #define dlp_info(msg, ...) printf("[info][%d][%d][%d] ", dlp_master_id,getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
 #define dlp_trace(msg, ...) printf("[trace][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
-#define dlp_warn(msg, ...) printf("[warn][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
-#define dlp_error(msg, ...) printf("[error][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id()); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_warn(msg, ...) printf("[warn][%d][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id(), errno); printf(msg, ##__VA_ARGS__); printf("\n")
+#define dlp_error(msg, ...) printf("[error][%d][%d][%d][%d] ", dlp_master_id, getpid(), dlp_get_id(), errno); printf(msg, ##__VA_ARGS__); printf("\n")
 
 // errors.
 
@@ -78,6 +79,7 @@ extern int dlp_master_id;
 #define ERROR_SOCKET_LISTEN     1000
 #define ERROR_FORK_WORKER       1001
 #define ERROR_ST_INITIALIZE     1002
+#define ERROR_ST_OPEN_FD        1003
 
 // utilies.
 #include <string>
@@ -85,5 +87,6 @@ extern int dlp_master_id;
 extern std::vector<int> dlp_list_to_ints(std::string str_list);
 extern int dlp_listen_tcp(int port, int& fd);
 extern int dlp_st_init();
+extern std::string dlp_get_peer_ip(int fd);
 
 #endif

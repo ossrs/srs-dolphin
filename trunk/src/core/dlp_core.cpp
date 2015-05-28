@@ -38,6 +38,9 @@ using namespace std;
 
 #include <st.h>
 
+// nginx also set to 512
+#define SERVER_LISTEN_BACKLOG 512
+
 bool st_initilaized = false;
 int dlp_master_id = getpid();
 std::map<st_thread_t, int> cache;
@@ -94,7 +97,7 @@ int dlp_listen_tcp(int port, int& fd)
 {
     int ret = ERROR_SUCCESS;
     
-    if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         ret = ERROR_SOCKET_LISTEN;
         dlp_error("create linux socket error. port=%d, ret=%d", port, ret);
         return ret;
@@ -112,13 +115,21 @@ int dlp_listen_tcp(int port, int& fd)
     sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    addr.sin_addr.s_addr = INADDR_ANY;
+    //addr.sin_addr.s_addr = inet_addr("0.0.0.0");
     if (bind(fd, (const sockaddr*)&addr, sizeof(sockaddr_in)) == -1) {
         ret = ERROR_SOCKET_LISTEN;
         dlp_error("bind socket error. port=%d, ret=%d", port, ret);
         return ret;
     }
     dlp_verbose("bind socket success. port=%d, fd=%d", port, fd);
+    
+    if (::listen(fd, SERVER_LISTEN_BACKLOG) == -1) {
+        ret = ERROR_SOCKET_LISTEN;
+        dlp_error("listen socket error. port=%d, ret=%d", port, ret);
+        return ret;
+    }
+    dlp_verbose("listen socket success. port=%d, fd=%d", port, fd);
     
     return ret;
 }
@@ -148,4 +159,32 @@ int dlp_st_init()
     dlp_trace("st main thread, cid=%d", dlp_get_id());
     
     return ret;
+}
+
+string dlp_get_peer_ip(int fd)
+{
+    std::string ip;
+    
+    // discovery client information
+    sockaddr_in addr;
+    socklen_t addrlen = sizeof(addr);
+    if (getpeername(fd, (sockaddr*)&addr, &addrlen) == -1) {
+        return ip;
+    }
+    dlp_verbose("get peer name success.");
+    
+    // ip v4 or v6
+    char buf[INET6_ADDRSTRLEN];
+    memset(buf, 0, sizeof(buf));
+    
+    if ((inet_ntop(addr.sin_family, &addr.sin_addr, buf, sizeof(buf))) == NULL) {
+        return ip;
+    }
+    dlp_verbose("get peer ip of client ip=%s, fd=%d", buf, fd);
+    
+    ip = buf;
+    
+    dlp_verbose("get peer ip success. ip=%s, fd=%d", ip.c_str(), fd);
+    
+    return ip;
 }

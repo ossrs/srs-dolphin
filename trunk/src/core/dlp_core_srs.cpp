@@ -39,7 +39,6 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
     
     // TODO: FIXME: run srs.
     for (;;) {
-        dlp_verbose("srs proecess serve at port %d", rtmp_port);
         st_sleep(3);
     }
     

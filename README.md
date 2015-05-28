@@ -70,6 +70,9 @@ Remark: User can use [SB][SB] to do the benchmark.
 1. [dev] Multiple Processes for SRS edge.
 1. [dev] Delivery stream in RTMP.
 1. [dev] Delivery stream in HTTP FLV.
+1. [dev] Support HTTP API for Multiple Processes.
+1. [dev] Muktiple Processes for SRS origin.
+1. [dev] Auto fork new process when worker or SRS exit.
 
 Winlin 2015.5
 
