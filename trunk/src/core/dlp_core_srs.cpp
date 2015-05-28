@@ -31,7 +31,7 @@ using namespace std;
 
 #include <st.h>
 
-int dlp_fork_srs(int rtmp_port, string binary, string conf)
+int dlp_fork_srs_process(int rtmp_port, int http_port, string binary, string conf)
 {
     int ret = ERROR_SUCCESS;
     
@@ -48,17 +48,22 @@ int dlp_fork_srs(int rtmp_port, string binary, string conf)
     std::string argv3 = "-p";
     char argv4[10];
     snprintf(argv4, sizeof(argv4), "%d", rtmp_port);
+    std::string argv5 = "-x";
+    char argv6[10];
+    snprintf(argv6, sizeof(argv6), "%d", http_port);
     // TODO: FIXME: should specifies the log file and tank.
     
-    char** argv = new char*[5 + 1];
+    char** argv = new char*[7 + 1];
     argv[0] = (char*)argv0.data();
     argv[1] = (char*)argv1.data();
     argv[2] = (char*)argv2.data();
     argv[3] = (char*)argv3.data();
     argv[4] = (char*)argv4;
-    argv[5] = NULL;
+    argv[5] = (char*)argv5.data();
+    argv[6] = (char*)argv6;
+    argv[7] = NULL;
     
-    dlp_trace("exec srs: %s %s %s %s %s", argv[0], argv[1], argv[2], argv[3], argv[4]);
+    dlp_trace("exec srs: %s %s %s %s %s %s %s", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
     
     // TODO: execv or execvp
     ret = execv(binary.data(), argv);
@@ -66,14 +71,14 @@ int dlp_fork_srs(int rtmp_port, string binary, string conf)
     return ret;
 }
 
-int dlp_run_srs(int rtmp_port, string binary, string conf)
+int dlp_run_srs(int rtmp_port, int http_port, string binary, string conf)
 {
     int ret = ERROR_SUCCESS;
     
     // set the title to srs
     dlp_process_title->set_title(DLP_SRS);
     
-    dlp_trace("dolphin srs serve port %d", rtmp_port);
+    dlp_trace("dolphin srs serve port rtmp=%d, http=%d", rtmp_port, http_port);
     
     pid_t pid = -1;
     if ((pid = fork()) < 0) {
@@ -84,13 +89,13 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
     
     // child process: ffmpeg encoder engine.
     if (pid == 0) {
-        ret = dlp_fork_srs(rtmp_port, binary, conf);
+        ret = dlp_fork_srs_process(rtmp_port, http_port, binary, conf);
         exit(ret);
     }
     
     // parent.
     // TODO: FIXME: we must manage these srs processes.
-    dlp_trace("fork srs pid=%d, port=%d, binary=%s, conf=%s", pid, rtmp_port, binary.c_str(), conf.c_str());
+    dlp_trace("fork srs pid=%d, rtmp=%d, http=%d, binary=%s, conf=%s", pid, rtmp_port, http_port, binary.c_str(), conf.c_str());
     
     for (;;) {
         int status = 0;
@@ -100,7 +105,7 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
         
         // update the title with dynamic data.
         char ptitle[256];
-        snprintf(ptitle, sizeof(ptitle), "%s(%dr)", DLP_SRS, rtmp_port);
+        snprintf(ptitle, sizeof(ptitle), "%s(%dr+%dh)", DLP_SRS, rtmp_port, http_port);
         dlp_process_title->set_title(ptitle);
         
         // use system sleep.

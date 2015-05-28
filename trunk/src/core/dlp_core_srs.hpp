@@ -30,6 +30,6 @@
 
 #include <dlp_core.hpp>
 
-extern int dlp_run_srs(int rtmp_port, std::string binary, std::string conf);
+extern int dlp_run_srs(int rtmp_port, int http_port, std::string binary, std::string conf);
 
 #endif

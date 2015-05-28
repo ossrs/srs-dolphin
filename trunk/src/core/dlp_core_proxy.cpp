@@ -362,8 +362,9 @@ void* dlp_context_fpn(void* arg)
     return NULL;
 }
 
-int dlp_run_proxyer(vector<int> ports, std::vector<int> fds, std::vector<int> sports)
-{
+int dlp_run_proxyer(vector<int> rports, vector<int> rfds,
+    vector<int> hports, vector<int> hfds, vector<int> srports, vector<int> shports
+) {
     int ret = ERROR_SUCCESS;
     
     // set the title to worker
@@ -375,13 +376,34 @@ int dlp_run_proxyer(vector<int> ports, std::vector<int> fds, std::vector<int> sp
     
     DlpProxyServer server;
     
-    dlp_assert(ports.size() == fds.size());
-    for (int i = 0; i < (int)ports.size(); i++) {
-        int port = ports.at(i);
-        int fd = fds.at(i);
+    dlp_assert(rports.size() == rfds.size());
+    for (int i = 0; i < (int)rports.size(); i++) {
+        int port = rports.at(i);
+        int fd = rfds.at(i);
         
         DlpProxyContext* context = new DlpProxyContext(&server);
-        if ((ret = context->initialize(port, fd, sports)) != ERROR_SUCCESS) {
+        if ((ret = context->initialize(port, fd, srports)) != ERROR_SUCCESS) {
+            dlp_freep(context);
+            return ret;
+        }
+        
+        st_thread_t trd = NULL;
+        if ((trd = st_thread_create(dlp_context_fpn, context, 0, 0)) == NULL) {
+            dlp_freep(context);
+            
+            ret = ERROR_ST_TRHEAD;
+            dlp_warn("worker thread create error. ret=%d", ret);
+            return ret;
+        }
+    }
+    
+    dlp_assert(hports.size() == hfds.size());
+    for (int i = 0; i < (int)hports.size(); i++) {
+        int port = hports.at(i);
+        int fd = hfds.at(i);
+        
+        DlpProxyContext* context = new DlpProxyContext(&server);
+        if ((ret = context->initialize(port, fd, shports)) != ERROR_SUCCESS) {
             dlp_freep(context);
             return ret;
         }

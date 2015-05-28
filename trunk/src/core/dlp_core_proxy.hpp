@@ -94,6 +94,9 @@ public:
     virtual int proxy_recv(DlpProxyRecvContext* rc);
 };
 
-extern int dlp_run_proxyer(std::vector<int> ports, std::vector<int> fds, std::vector<int> sports);
+extern int dlp_run_proxyer(
+    std::vector<int> rports, std::vector<int> rfds, std::vector<int> hports, std::vector<int> hfds,
+    std::vector<int> sports, std::vector<int> shports
+);
 
 #endif

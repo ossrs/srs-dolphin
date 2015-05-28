@@ -41,20 +41,24 @@ using namespace std;
 
 void dlp_help(char** argv)
 {
-    printf("Usage: %s -p <proxy ports> -w <worker process> -s <service ports> -b <srs binary> -c <srs_config>\n"
-        "       -p proxy ports, the ports for dolphin to listen at.\n"
-        "       -w worker process, the number of woker process to fork.\n"
-        "       -s service ports, the port for srs to listen at, to service the dolphin.\n"
-        "       -b srs binary, the binary file path of srs.\n"
-        "       -c srs config, the config file for srs.\n"
+    printf("Usage: %s [-vVh] -w <worker process> -p <rtmp ports> -x <http ports> -b <srs binary> -c <srs_config> -s <srs rtmp ports> -y <srs http ports>\n"
+        "       -?, -h          : show this help and exit.\n"
+        "       -v, -V          : show the version of srs-dolphin and exit.\n"
+        "       -w              : worker process, the number of woker process to fork.\n"
+        "       -p              : rtmp ports, the ports for dolphin to listen at for rtmp.\n"
+        "       -x              : http ports, the port for dolphin to listen at for http.\n"
+        "       -b              : srs binary, the binary file path of srs, to serve the dolphin.\n"
+        "       -c              : srs config, the config file for srs, to serve the dolphin.\n"
+        "       -s              : srs rtmp ports, the port for srs to listen at for rtmp, to service the dolphin.\n"
+        "       -y              : srs http ports, the port for srs to listen at for http, to service the dolphin."
         "For example, use srs linked to current dir:\n"
-        "       %s -p 19350 -w 1 -s 2935 -b srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -w 1 -p 19350 -x 8088 -b srs/objs/srs -c conf/dolphin.conf -s 2935 -y 8081\n"
+        "       %s -w 4 -p 19350 -x 8088 -b srs/objs/srs -c conf/dolphin.conf -s 2935,2936,2937,2938 -y 8081,8082,8083,8084\n"
+        "       %s -w 4 -p 19350 -x 8088 -b srs/objs/srs -c conf/dolphin.conf -s 2935,2936,2937,2938 -y 8081,8082,8083,8084\n"
         "Or, use srs at your home dir:\n"
-        "       %s -p 19350 -w 1 -s 2935 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -w 1 -p 19350 -x 8088 -b ~/srs/objs/srs -c conf/dolphin.conf -s 2935 -y 8081\n"
+        "       %s -w 4 -p 19350 -x 8088 -b ~/srs/objs/srs -c conf/dolphin.conf -s 2935,2936,2937,2938 -y 8081,8082,8083,8084\n"
+        "       %s -w 4 -p 19350 -x 8088 -b ~/srs/objs/srs -c conf/dolphin.conf -s 2935,2936,2937,2938 -y 8081,8082,8083,8084\n"
         "@remark the conf/dolphin.conf is a edge where its origin is 1935, so dolphin use 19350.\n"
         "       while user can change the port of origin, edge and dolphin.\n",
         argv[0], argv[0], argv[0], argv[0], argv[0], argv[0], argv[0]);
@@ -62,8 +66,8 @@ void dlp_help(char** argv)
 
 void dlp_parse_options(
     int argc, char** argv,
-    bool& show_version, bool& show_help, string& dlp_proxy_ports, int& dlp_worker_process,
-    string& srs_service_ports, string& srs_binary, string& srs_config_file
+    bool& show_version, bool& show_help, string& dlp_rtmp_ports, string& dlp_http_ports, int& dlp_worker_process,
+    string& srs_rtmp_ports, string& srs_http_ports, string& srs_binary, string& srs_config_file
 ) {
     
     for (int i = 0; i < argc; i++) {
@@ -71,8 +75,9 @@ void dlp_parse_options(
         if (p[0] != '-') {
             continue;
         }
-        if (p[1] != 'v' && p[1] != 'V' && p[1] != 'h'
+        if (p[1] != 'v' && p[1] != 'V' && p[1] != 'h' && p[1] != '?'
             && p[1] != 'p' && p[1] != 'w' && p[1] != 's' && p[1] != 'b' && p[1] != 'c'
+            && p[1] != 'x' && p[1] != 'y'
         ) {
             continue;
         }
@@ -82,17 +87,17 @@ void dlp_parse_options(
             break;
         }
         
-        if (p[1] == 'h') {
+        if (p[1] == 'h' || p[1] == '?') {
             show_help = true;
             break;
         }
         
         if (p[1] == 'p') {
             if (i + 1 >= argc) {
-                printf("invalid options, params required, -p <proxy ports>");
+                printf("invalid options, params required, -p <rtmp ports>");
                 exit(-1);
             }
-            dlp_proxy_ports = argv[++i];
+            dlp_rtmp_ports = argv[++i];
             continue;
         }
         
@@ -107,10 +112,10 @@ void dlp_parse_options(
         
         if (p[1] == 's') {
             if (i + 1 >= argc) {
-                printf("invalid options, params required, -s <service ports>");
+                printf("invalid options, params required, -s <srs rtmp ports>");
                 exit(-1);
             }
-            srs_service_ports = argv[++i];
+            srs_rtmp_ports = argv[++i];
             continue;
         }
         
@@ -131,6 +136,24 @@ void dlp_parse_options(
             srs_config_file = argv[++i];
             continue;
         }
+        
+        if (p[1] == 'x') {
+            if (i + 1 >= argc) {
+                printf("invalid options, params required, -x <http ports>");
+                exit(-1);
+            }
+            dlp_http_ports = argv[++i];
+            continue;
+        }
+        
+        if (p[1] == 'y') {
+            if (i + 1 >= argc) {
+                printf("invalid options, params required, -y <srs http ports>");
+                exit(-1);
+            }
+            srs_http_ports = argv[++i];
+            continue;
+        }
     }
     
     if (show_version) {
@@ -138,7 +161,10 @@ void dlp_parse_options(
         exit(0);
     }
     
-    if (show_help || dlp_proxy_ports.empty() || dlp_worker_process <= 0 || srs_service_ports.empty() || srs_binary.empty() || srs_config_file.empty()) {
+    if (show_help || dlp_rtmp_ports.empty() || dlp_worker_process <= 0
+        || srs_rtmp_ports.empty() || srs_binary.empty() || srs_config_file.empty()
+        || dlp_http_ports.empty() || srs_http_ports.empty()
+    ) {
         dlp_help(argv);
         if (show_help) {
             exit(0);
@@ -148,7 +174,7 @@ void dlp_parse_options(
     }
 }
 
-int dlp_listen_rtmp(vector<int> ports, vector<int>& fds)
+int dlp_listen_tcp(vector<int> ports, vector<int>& fds)
 {
     int ret = ERROR_SUCCESS;
     
@@ -167,8 +193,11 @@ int dlp_listen_rtmp(vector<int> ports, vector<int>& fds)
     return ret;
 }
 
-int dlp_fork_workers(vector<int> ports, vector<int> fds, int workers, vector<int>& pids, vector<int> sports)
-{
+int dlp_fork_workers(
+    int workers, vector<int> srports, vector<int> shports,
+    vector<int> rports, vector<int> rfds, vector<int> hports, vector<int> hfds,
+    vector<int>& pids
+) {
     int ret = ERROR_SUCCESS;
     
     for (int i = 0; i < workers; i++) {
@@ -183,7 +212,7 @@ int dlp_fork_workers(vector<int> ports, vector<int> fds, int workers, vector<int
         
         // child process: worker proxy engine.
         if (pid == 0) {
-            ret = dlp_run_proxyer(ports, fds, sports);
+            ret = dlp_run_proxyer(rports, rfds, hports, hfds, srports, shports);
             exit(ret);
         }
         
@@ -194,13 +223,15 @@ int dlp_fork_workers(vector<int> ports, vector<int> fds, int workers, vector<int
     return ret;
 }
 
-int dlp_fork_srs(vector<int> rtmp_ports, string binary, string conf, vector<int>& pids)
+int dlp_fork_srs_servers(vector<int> rtmp_ports, vector<int> http_ports, string binary, string conf, vector<int>& pids)
 {
     int ret = ERROR_SUCCESS;
     
+    dlp_assert(rtmp_ports.size() == http_ports.size());
     for (int i = 0; i < (int)rtmp_ports.size(); i++) {
         pid_t pid = -1;
         int rtmp_port = rtmp_ports.at(i);
+        int http_port = http_ports.at(i);
         
         // TODO: fork or vfork?
         if ((pid = fork()) < 0) {
@@ -211,12 +242,12 @@ int dlp_fork_srs(vector<int> rtmp_ports, string binary, string conf, vector<int>
         
         // child process: worker SRS engine.
         if (pid == 0) {
-            ret = dlp_run_srs(rtmp_port, binary, conf);
+            ret = dlp_run_srs(rtmp_port, http_port, binary, conf);
             exit(ret);
         }
         
         pids.push_back(pid);
-        dlp_trace("dolphin fork srs pid=%d, listen=%d, binary=%s, conf=%s", pid, rtmp_port, binary.c_str(), conf.c_str());
+        dlp_trace("dolphin fork srs pid=%d, rtmp=%d, http=%d, binary=%s, conf=%s", pid, rtmp_port, http_port, binary.c_str(), conf.c_str());
     }
     
     return ret;
@@ -232,41 +263,55 @@ int main(int argc, char** argv)
     // default params.
     bool show_version = false; // -vV
     bool show_help = false; // -h
-    std::string dlp_proxy_ports; // -p 1935
+    std::string dlp_rtmp_ports; // -p 1935
+    std::string dlp_http_ports; // -x 8088
     int dlp_worker_process = 0; // -w 1
-    std::string srs_service_ports; // -s 1936
+    std::string srs_rtmp_ports; // -s 1936
+    std::string srs_http_ports; // -y 8081
     std::string srs_binary; // -b srs/objs/srs
     std::string srs_config_file; // -c srs/conf/srs.conf
     dlp_parse_options(
         argc, argv,
-        show_version, show_help, dlp_proxy_ports, dlp_worker_process,
-        srs_service_ports, srs_binary, srs_config_file
+        show_version, show_help, dlp_rtmp_ports, dlp_http_ports, dlp_worker_process,
+        srs_rtmp_ports, srs_http_ports, srs_binary, srs_config_file
     );
     
-    dlp_trace("dolphin listen at %s", dlp_proxy_ports.c_str());
+    dlp_trace("dolphin rtmp listen at %s", dlp_rtmp_ports.c_str());
+    dlp_trace("dolphin http listen at %s", dlp_http_ports.c_str());
     dlp_trace("dolphin will fork %d worker process", dlp_worker_process);
-    dlp_trace("dolphin start srs to listen at %s", srs_service_ports.c_str());
+    dlp_trace("dolphin start srs to rtmp listen at %s", srs_rtmp_ports.c_str());
+    dlp_trace("dolphin start srs to http listen at %s", srs_http_ports.c_str());
     dlp_trace("dolphin use srs binary at %s", srs_binary.c_str());
     dlp_trace("dolphin use config file %s for srs", srs_config_file.c_str());
     
-    std::vector<int> rtmp_service_ports = dlp_list_to_ints(srs_service_ports);
-    std::vector<int> rtmp_proxy_ports = dlp_list_to_ints(dlp_proxy_ports);
+    std::vector<int> vsrs_rtmp_ports = dlp_list_to_ints(srs_rtmp_ports);
+    std::vector<int> vdlp_rtmp_ports = dlp_list_to_ints(dlp_rtmp_ports);
+    std::vector<int> vsrs_http_ports = dlp_list_to_ints(srs_http_ports);
+    std::vector<int> vdlp_http_ports = dlp_list_to_ints(dlp_http_ports);
     
     // listen the serve socket for workers.
-    std:vector<int> rtmp_fds;
-    if ((ret = dlp_listen_rtmp(rtmp_proxy_ports, rtmp_fds)) != ERROR_SUCCESS) {
+    std::vector<int> rtmp_fds;
+    if ((ret = dlp_listen_tcp(vdlp_rtmp_ports, rtmp_fds)) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
+    // listen the serve socket for workers.
+    std::vector<int> http_fds;
+    if ((ret = dlp_listen_tcp(vdlp_http_ports, http_fds)) != ERROR_SUCCESS) {
         return ret;
     }
     
     // fork all srs servers.
     std::vector<int> srs_pids;
-    if ((ret = dlp_fork_srs(rtmp_service_ports, srs_binary, srs_config_file, srs_pids)) != ERROR_SUCCESS) {
+    if ((ret = dlp_fork_srs_servers(vsrs_rtmp_ports, vsrs_http_ports, srs_binary, srs_config_file, srs_pids)) != ERROR_SUCCESS) {
         return ret;
     }
     
     // fork all workers.
     std::vector<int> worker_pids;
-    if ((ret = dlp_fork_workers(rtmp_proxy_ports, rtmp_fds, dlp_worker_process, worker_pids, rtmp_service_ports)) != ERROR_SUCCESS) {
+    if ((ret = dlp_fork_workers(dlp_worker_process, vsrs_rtmp_ports, vsrs_http_ports,
+        vdlp_rtmp_ports, rtmp_fds, vdlp_http_ports, http_fds, worker_pids)) != ERROR_SUCCESS
+    ) {
         return ret;
     }
     
