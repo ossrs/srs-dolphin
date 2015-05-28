@@ -177,8 +177,8 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     }
     
     // wait for thread to start.
-    while (!rc.cycle) {
-        st_usleep(100 * 1000);
+    while (!rc.cycle || rc.terminated) {
+        st_usleep(30 * 1000);
     }
     
     DlpStSocket skt_client(stfd);
@@ -187,7 +187,7 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     char buf[4096];
     while (!rc.terminated) {
         ssize_t nread = 0;
-        if ((ret = skt_srs.read(buf, 1024, &nread)) != ERROR_SUCCESS) {
+        if ((ret = skt_srs.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
             return ret;
         }
         dlp_assert(nread > 0);
@@ -204,7 +204,7 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     
     // wait for thread to quit.
     while (!rc.terminated) {
-        st_usleep(100 * 1000);
+        st_usleep(120 * 1000);
     }
     
     return ret;
