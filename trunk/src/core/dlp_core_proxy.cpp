@@ -152,8 +152,8 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     DlpStSocket skt_client(stfd);
     DlpStSocket skt_srs(srs);
     
-    skt_client.set_recv_timeout(0);
-    skt_srs.set_recv_timeout(500 * 1000);
+    //skt_client.set_recv_timeout(0);
+    //skt_srs.set_recv_timeout(500 * 1000);
     
     pollfd pds[2];
     pds[0].fd = st_netfd_fileno(stfd);
@@ -163,7 +163,7 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     
     char buf[4096];
     ssize_t nread = 0;
-    
+        
     // TODO: FIXME: refine performance, use poll or writev.
     for (;;) {
         // check which is active.

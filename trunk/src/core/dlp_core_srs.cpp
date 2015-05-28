@@ -48,6 +48,7 @@ int dlp_fork_srs(int rtmp_port, string binary, string conf)
     std::string argv3 = "-p";
     char argv4[10];
     snprintf(argv4, sizeof(argv4), "%d", rtmp_port);
+    // TODO: FIXME: should specifies the log file and tank.
     
     char** argv = new char*[5 + 1];
     argv[0] = (char*)argv0.data();

@@ -31,6 +31,7 @@
 		3C15C7161B15EBA2000B8A9A /* dolphin */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dolphin; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C5814911B15EC5400980A53 /* dlp_core.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = dlp_core.hpp; path = ../../../src/core/dlp_core.hpp; sourceTree = "<group>"; };
 		3C5814921B15EC6500980A53 /* dlp_main_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_main_server.cpp; path = ../../../src/main/dlp_main_server.cpp; sourceTree = "<group>"; };
+		3C71BAFD1B17105100256D1A /* dolphin.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = dolphin.conf; path = ../../../conf/dolphin.conf; sourceTree = "<group>"; };
 		3CC7535A1B15EE2900481266 /* dlp_core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_core.cpp; path = ../../../src/core/dlp_core.cpp; sourceTree = "<group>"; };
 		3CC7535C1B15F13B00481266 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../../../Makefile; sourceTree = "<group>"; };
 		3CC7535E1B16195300481266 /* dlp_core_proxy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dlp_core_proxy.cpp; path = ../../../src/core/dlp_core_proxy.cpp; sourceTree = "<group>"; };
@@ -70,6 +71,7 @@
 		3C15C7181B15EBA2000B8A9A /* dolphin */ = {
 			isa = PBXGroup;
 			children = (
+				3C71BAFD1B17105100256D1A /* dolphin.conf */,
 				3CC753641B161AB800481266 /* README.md */,
 				3CC7535C1B15F13B00481266 /* Makefile */,
 				3C5814901B15EC4500980A53 /* core */,
