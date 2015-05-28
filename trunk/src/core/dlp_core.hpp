@@ -86,6 +86,7 @@ extern int dlp_master_id;
 #define ERROR_SOCKET_READ       1007
 #define ERROR_SOCKET_READ_FULLY 1008
 #define ERROR_SOCKET_WRITE      1009
+#define ERROR_FORK_SRS          1010
 
 // utilies.
 #include <string>

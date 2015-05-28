@@ -27,20 +27,56 @@ using namespace std;
 
 #include <st.h>
 
+int dlp_fork_srs(int rtmp_port, string binary, string conf)
+{
+    int ret = ERROR_SUCCESS;
+    
+    // close other fds
+    // TODO: do in right way.
+    for (int i = 3; i < 1024; i++) {
+        ::close(i);
+    }
+    
+    // params for srs.
+    std::string argv0 = "-c";
+    std::string argv1 = conf;
+    
+    char** argv = new char*[2 + 1];
+    argv[0] = (char*)argv0.data();
+    argv[1] = (char*)argv1.data();
+    argv[2] = NULL;
+    
+    // TODO: execv or execvp
+    ret = execv(binary.data(), argv);
+    
+    return ret;
+}
+
 int dlp_run_srs(int rtmp_port, string binary, string conf)
 {
     int ret = ERROR_SUCCESS;
     
-    if ((ret = dlp_st_init()) != ERROR_SUCCESS) {
+    dlp_trace("dolphin srs serve port %d", rtmp_port);
+    
+    pid_t pid = -1;
+    if ((pid = fork()) < 0) {
+        ret = ERROR_FORK_SRS;
+        dlp_error("fork srs failed. ret=%d", ret);
         return ret;
     }
     
-    dlp_trace("dolphin srs serve port %d", rtmp_port);
-    
-    // TODO: FIXME: run srs.
-    for (;;) {
-        st_sleep(3);
+    // child process: ffmpeg encoder engine.
+    if (pid == 0) {
+        ret = dlp_fork_srs(rtmp_port, binary, conf);
+        exit(ret);
     }
+    
+    // parent.
+    dlp_trace("fork srs pid=%d, port=%d, binary=%s, conf=%s", pid, rtmp_port, binary.c_str(), conf.c_str());
+    
+    int status = 0;
+    waitpid(pid, &status, 0);
+    dlp_warn("srs quit, status=%d, pid=%d", status, pid);
     
     return ret;
 }

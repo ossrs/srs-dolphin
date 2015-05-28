@@ -142,12 +142,26 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
     skt_client.set_recv_timeout(0);
     skt_srs.set_recv_timeout(500 * 1000);
     
+    pollfd pds[2];
+    pds[0].fd = st_netfd_fileno(stfd);
+    pds[0].events = POLLIN;
+    pds[1].fd = st_netfd_fileno(srs);
+    pds[1].events = POLLIN;
+    
     char buf[4096];
+    ssize_t nread = 0;
+    
+    // TODO: FIXME: refine performance, use poll or writev.
     for (;;) {
-        ssize_t nread = 0;
+        // check which is active.
+        pds[0].revents = 0;
+        pds[1].revents = 0;
+        if (st_poll(pds, 2, ST_UTIME_NO_TIMEOUT) <= 0) {
+            break;
+        }
         
         // proxy client ==> srs.
-        if (true) {
+        if (pds[0].revents & POLLIN) {
             nread = 0;
             
             if ((ret = skt_client.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
@@ -162,7 +176,7 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
         }
         
         // proxy srs ==> client
-        if (true) {
+        if (pds[1].revents & POLLIN) {
             nread = 0;
             
             if ((ret = skt_srs.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
