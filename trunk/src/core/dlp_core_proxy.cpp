@@ -136,9 +136,52 @@ int DlpProxyConnection::proxy(st_netfd_t srs)
 {
     int ret = ERROR_SUCCESS;
     
-    // TODO: FIXME: implements it.
+    DlpStSocket skt_client(stfd);
+    DlpStSocket skt_srs(srs);
+    
+    skt_client.set_recv_timeout(300 * 1000);
+    skt_srs.set_recv_timeout(1500 * 1000);
+    
+    char buf[4096];
     for (;;) {
-        st_sleep(3);
+        // proxy client ==> srs.
+        ssize_t nread = 0;
+        for (;;) {
+            nread = 0;
+            
+            if ((ret = skt_client.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
+                if (ret != ERROR_SOCKET_TIMEOUT) {
+                    return ret;
+                }
+            }
+            
+            if (nread <= 0) {
+                break;
+            }
+            
+            if ((ret = skt_srs.write(buf, nread, NULL)) != ERROR_SUCCESS) {
+                return ret;
+            }
+        }
+        
+        // proxy srs ==> client
+        for (;;) {
+            nread = 0;
+            
+            if ((ret = skt_srs.read(buf, 4096, &nread)) != ERROR_SUCCESS) {
+                if (ret != ERROR_SOCKET_TIMEOUT) {
+                    return ret;
+                }
+            }
+            
+            if (nread <= 0) {
+                break;
+            }
+            
+            if ((ret = skt_client.write(buf, nread, NULL)) != ERROR_SUCCESS) {
+                return ret;
+            }
+        }
     }
     
     return ret;
@@ -170,6 +213,7 @@ int dlp_connection_proxy(DlpProxyConnection* conn)
     // do proxy.
     ret = conn->proxy(stfd);
     context->release_srs(srs);
+    dlp_close_stfd(stfd);
     
     return ret;
 }

@@ -82,6 +82,10 @@ extern int dlp_master_id;
 #define ERROR_ST_OPEN_FD        1003
 #define ERROR_ST_TRHEAD         1004
 #define ERROR_ST_SOCKET         1005
+#define ERROR_SOCKET_TIMEOUT    1006
+#define ERROR_SOCKET_READ       1007
+#define ERROR_SOCKET_READ_FULLY 1008
+#define ERROR_SOCKET_WRITE      1009
 
 // utilies.
 #include <string>
@@ -93,5 +97,41 @@ extern int dlp_st_init();
 extern std::string dlp_get_peer_ip(int fd);
 extern void dlp_close_stfd(st_netfd_t& stfd);
 extern int dlp_socket_connect(std::string server, int port, st_utime_t timeout, st_netfd_t* pstfd);
+
+/**
+ * the socket provides TCP socket over st,
+ * that is, the sync socket mechanism.
+ */
+class DlpStSocket
+{
+private:
+    int64_t recv_timeout;
+    int64_t send_timeout;
+    int64_t recv_bytes;
+    int64_t send_bytes;
+    st_netfd_t stfd;
+public:
+    DlpStSocket(st_netfd_t client_stfd);
+    virtual ~DlpStSocket();
+public:
+    virtual bool is_never_timeout(int64_t timeout_us);
+    virtual void set_recv_timeout(int64_t timeout_us);
+    virtual int64_t get_recv_timeout();
+    virtual void set_send_timeout(int64_t timeout_us);
+    virtual int64_t get_send_timeout();
+    virtual int64_t get_recv_bytes();
+    virtual int64_t get_send_bytes();
+public:
+    /**
+     * @param nread, the actual read bytes, ignore if NULL.
+     */
+    virtual int read(void* buf, size_t size, ssize_t* nread);
+    virtual int read_fully(void* buf, size_t size, ssize_t* nread);
+    /**
+     * @param nwrite, the actual write bytes, ignore if NULL.
+     */
+    virtual int write(void* buf, size_t size, ssize_t* nwrite);
+    virtual int writev(const iovec *iov, int iov_size, ssize_t* nwrite);
+};
 
 #endif
