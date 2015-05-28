@@ -460,7 +460,8 @@ void DlpProcessTitle::set_argcv(int c, char** v)
             continue;
         }
         
-        argv_length.push_back(nb_p);
+        // the size of argv should plus the last 0.
+        argv_length.push_back(nb_p + 1);
     }
 }
 
@@ -480,8 +481,8 @@ void DlpProcessTitle::set_title(const char* title)
         char* p = argv[i];
         int nb_p = argv_length.at(i);
         
-        int nwrite = snprintf(p, nb_p, "%s", pos);
-        pos += nwrite;
+        snprintf(p, nb_p, "%s", pos);
+        pos += nb_p - 1;
     }
 }
 
