@@ -48,13 +48,15 @@ void dlp_help(char** argv)
         "       -b srs binary, the binary file path of srs.\n"
         "       -c srs config, the config file for srs.\n"
         "For example, use srs linked to current dir:\n"
-        "       %s -p 1935 -w 1 -s 1936 -b srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 1935 -w 4 -s 1936,1937,1938,1939 -b srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 19350 -w 4 -s 1936,1937,1938,1939 -b srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -p 19350 -w 1 -s 2935 -b srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b srs/objs/srs -c conf/dolphin.conf\n"
         "Or, use srs at your home dir:\n"
-        "       %s -p 1935 -w 1 -s 1936 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 1935 -w 4 -s 1936,1937,1938,1939 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
-        "       %s -p 19350 -w 4 -s 1936,1937,1938,1939 -b ~/srs/objs/srs -c conf/dolphin.conf\n",
+        "       %s -p 19350 -w 1 -s 2935 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
+        "       %s -p 19350 -w 4 -s 2935,2936,2937,2938 -b ~/srs/objs/srs -c conf/dolphin.conf\n"
+        "@remark the conf/dolphin.conf is a edge where its origin is 1935, so dolphin use 19350.\n"
+        "       while user can change the port of origin, edge and dolphin.\n",
         argv[0], argv[0], argv[0], argv[0], argv[0], argv[0], argv[0]);
 }
 
