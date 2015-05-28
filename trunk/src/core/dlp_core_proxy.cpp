@@ -36,6 +36,13 @@ DlpProxyContext::DlpProxyContext()
 DlpProxyContext::~DlpProxyContext()
 {
     ::close(_fd);
+    
+    std::vector<DlpProxySrs*>::iterator it;
+    for (it = sports.begin(); it != sports.end(); ++it) {
+        DlpProxySrs* srs = *it;
+        dlp_freep(srs);
+    }
+    sports.clear();
 }
 
 int DlpProxyContext::initialize(int p, int f, vector<int> sps)
@@ -44,7 +51,13 @@ int DlpProxyContext::initialize(int p, int f, vector<int> sps)
     
     _port = p;
     _fd = f;
-    sports = sps;
+    
+    for (int i = 0; i < (int)sps.size(); i++) {
+        DlpProxySrs* srs = new DlpProxySrs();
+        srs->port = sps.at(i);
+        srs->load = 0;
+        sports.push_back(srs);
+    }
     
     return ret;
 }
@@ -59,9 +72,38 @@ int DlpProxyContext::port()
     return _port;
 }
 
+DlpProxySrs* DlpProxyContext::choose_srs()
+{
+    DlpProxySrs* match = NULL;
+    
+    std::vector<DlpProxySrs*>::iterator it;
+    for (it = sports.begin(); it != sports.end(); ++it) {
+        DlpProxySrs* srs = *it;
+        if (!match || match->load > srs->load) {
+            match = srs;
+        }
+    }
+    
+    if (match) {
+        match->load++;
+    }
+    
+    return match;
+}
+
+void DlpProxyContext::release_srs(DlpProxySrs* srs)
+{
+    std::vector<DlpProxySrs*>::iterator it;
+    it = std::find(sports.begin(), sports.end(), srs);
+    
+    if (it != sports.end()) {
+        srs->load--;
+    }
+}
+
 DlpProxyConnection::DlpProxyConnection()
 {
-    context = NULL;
+    _context = NULL;
     stfd = NULL;
 }
 
@@ -74,7 +116,7 @@ int DlpProxyConnection::initilaize(DlpProxyContext* c, st_netfd_t s)
 {
     int ret = ERROR_SUCCESS;
     
-    context = c;
+    _context = c;
     stfd = s;
     
     return ret;
@@ -85,18 +127,49 @@ int DlpProxyConnection::fd()
     return st_netfd_fileno(stfd);
 }
 
-int dlp_connection_proxy(DlpProxyConnection* conn)
+DlpProxyContext* DlpProxyConnection::context()
+{
+    return _context;
+}
+
+int DlpProxyConnection::proxy(st_netfd_t srs)
 {
     int ret = ERROR_SUCCESS;
-    
-    int fd = conn->fd();
-    std::string ip = dlp_get_peer_ip(fd);
-    dlp_trace("woker serve fd=%d, %s", fd, ip.c_str());
     
     // TODO: FIXME: implements it.
     for (;;) {
         st_sleep(3);
     }
+    
+    return ret;
+}
+
+int dlp_connection_proxy(DlpProxyConnection* conn)
+{
+    int ret = ERROR_SUCCESS;
+    
+    DlpProxyContext* context = conn->context();
+    
+    // discovery client information.
+    int fd = conn->fd();
+    std::string ip = dlp_get_peer_ip(fd);
+    
+    // choose the best SRS service por
+    DlpProxySrs* srs = context->choose_srs();
+    dlp_assert(srs);
+    dlp_trace("woker serve %s, fd=%d, srs_port=%d", ip.c_str(), fd, srs->port);
+    
+    // try to connect to srs.
+    // TODO: FIXME: use timeout.
+    // TODO: FIXME: retry next srs when error.
+    st_netfd_t stfd = NULL;
+    if ((ret = dlp_socket_connect("127.0.0.1", srs->port, ST_UTIME_NO_TIMEOUT, &stfd)) != ERROR_SUCCESS) {
+        return ret;
+    }
+    
+    // do proxy.
+    ret = conn->proxy(stfd);
+    context->release_srs(srs);
     
     return ret;
 }

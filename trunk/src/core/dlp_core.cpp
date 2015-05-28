@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
 #include <map>
 using namespace std;
 
@@ -200,5 +203,77 @@ void dlp_close_stfd(st_netfd_t& stfd)
         // close it manually.
         close(fd);
     }
+}
+
+string dlp_dns_resolve(string host)
+{
+    if (inet_addr(host.c_str()) != INADDR_NONE) {
+        return host;
+    }
+    
+    hostent* answer = gethostbyname(host.c_str());
+    if (answer == NULL) {
+        return "";
+    }
+    
+    char ipv4[16];
+    memset(ipv4, 0, sizeof(ipv4));
+    if (answer->h_length > 0) {
+        inet_ntop(AF_INET, answer->h_addr_list[0], ipv4, sizeof(ipv4));
+    }
+    
+    return ipv4;
+}
+
+int dlp_socket_connect(string server, int port, st_utime_t timeout, st_netfd_t* pstfd)
+{
+    int ret = ERROR_SUCCESS;
+    
+    *pstfd = NULL;
+    st_netfd_t stfd = NULL;
+    sockaddr_in addr;
+    
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if(sock == -1){
+        ret = ERROR_ST_SOCKET;
+        dlp_error("create socket error. ret=%d", ret);
+        return ret;
+    }
+    
+    dlp_assert(!stfd);
+    stfd = st_netfd_open_socket(sock);
+    if(stfd == NULL){
+        ret = ERROR_ST_SOCKET;
+        dlp_error("st_netfd_open_socket failed. ret=%d", ret);
+        return ret;
+    }
+    
+    // connect to server.
+    std::string ip = dlp_dns_resolve(server);
+    if (ip.empty()) {
+        ret = ERROR_ST_SOCKET;
+        dlp_error("dns resolve server error, ip empty. ret=%d", ret);
+        goto failed;
+    }
+    
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = inet_addr(ip.c_str());
+    
+    if (st_connect(stfd, (const struct sockaddr*)&addr, sizeof(sockaddr_in), timeout) == -1){
+        ret = ERROR_ST_SOCKET;
+        dlp_error("connect to server error. ip=%s, port=%d, ret=%d", ip.c_str(), port, ret);
+        goto failed;
+    }
+    dlp_info("connect ok. server=%s, ip=%s, port=%d", server.c_str(), ip.c_str(), port);
+    
+    *pstfd = stfd;
+    return ret;
+    
+failed:
+    if (stfd) {
+        dlp_close_stfd(stfd);
+    }
+    return ret;
 }
 

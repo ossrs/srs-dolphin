@@ -34,12 +34,18 @@
 
 #include <st.h>
 
+struct DlpProxySrs
+{
+    int port;
+    int load;
+};
+
 class DlpProxyContext
 {
 private:
     int _port;
     int _fd;
-    std::vector<int> sports;
+    std::vector<DlpProxySrs*> sports;
 public:
     DlpProxyContext();
     virtual ~DlpProxyContext();
@@ -47,19 +53,23 @@ public:
     virtual int initialize(int p, int f, std::vector<int> sps);
     virtual int fd();
     virtual int port();
+    virtual DlpProxySrs* choose_srs();
+    virtual void release_srs(DlpProxySrs* srs);
 };
 
 class DlpProxyConnection
 {
 private:
-    DlpProxyContext* context;
+    DlpProxyContext* _context;
     st_netfd_t stfd;
 public:
     DlpProxyConnection();
     virtual ~DlpProxyConnection();
 public:
     virtual int initilaize(DlpProxyContext* c, st_netfd_t s);
+    virtual DlpProxyContext* context();
     virtual int fd();
+    virtual int proxy(st_netfd_t srs);
 };
 
 extern int dlp_run_proxyer(std::vector<int> ports, std::vector<int> fds, std::vector<int> sports);
