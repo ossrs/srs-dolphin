@@ -85,7 +85,7 @@ int DlpProxyConnection::fd()
     return st_netfd_fileno(stfd);
 }
 
-int dlp_proxy(DlpProxyConnection* conn)
+int dlp_connection_proxy(DlpProxyConnection* conn)
 {
     int ret = ERROR_SUCCESS;
     
@@ -101,13 +101,13 @@ int dlp_proxy(DlpProxyConnection* conn)
     return ret;
 }
 
-void* dlp_proxy_pfn(void* arg)
+void* dlp_connection_pfn(void* arg)
 {
     DlpProxyConnection* conn = (DlpProxyConnection*)arg;
     dlp_assert(conn);
     
     int ret = ERROR_SUCCESS;
-    if ((ret = dlp_proxy(conn)) != ERROR_SUCCESS) {
+    if ((ret = dlp_connection_proxy(conn)) != ERROR_SUCCESS) {
         dlp_warn("worker proxy connection failed, ret=%d", ret);
     } else {
         dlp_trace("worker proxy connection completed.");
@@ -118,7 +118,7 @@ void* dlp_proxy_pfn(void* arg)
     return NULL;
 }
 
-int dlp_run_proxyer_for(DlpProxyContext* context)
+int dlp_context_proxy(DlpProxyContext* context)
 {
     int ret = ERROR_SUCCESS;
     
@@ -147,7 +147,7 @@ int dlp_run_proxyer_for(DlpProxyContext* context)
         }
         
         st_thread_t trd = NULL;
-        if ((trd = st_thread_create(dlp_proxy_pfn, conn, 0, 0)) == NULL) {
+        if ((trd = st_thread_create(dlp_connection_pfn, conn, 0, 0)) == NULL) {
             dlp_freep(conn);
             
             dlp_warn("ignore worker thread create error.");
@@ -158,13 +158,13 @@ int dlp_run_proxyer_for(DlpProxyContext* context)
     return ret;
 }
 
-void* dlp_run_proxyer_pfn(void* arg)
+void* dlp_context_fpn(void* arg)
 {
     DlpProxyContext* context = (DlpProxyContext*)arg;
     dlp_assert(context);
     
     int ret = ERROR_SUCCESS;
-    if ((ret = dlp_run_proxyer_for(context)) != ERROR_SUCCESS) {
+    if ((ret = dlp_context_proxy(context)) != ERROR_SUCCESS) {
         dlp_warn("worker proxy context failed, ret=%d", ret);
     } else {
         dlp_trace("worker proxy context completed.");
@@ -195,7 +195,7 @@ int dlp_run_proxyer(vector<int> ports, std::vector<int> fds, std::vector<int> sp
         }
         
         st_thread_t trd = NULL;
-        if ((trd = st_thread_create(dlp_run_proxyer_pfn, context, 0, 0)) == NULL) {
+        if ((trd = st_thread_create(dlp_context_fpn, context, 0, 0)) == NULL) {
             dlp_freep(context);
             
             ret = ERROR_ST_TRHEAD;
