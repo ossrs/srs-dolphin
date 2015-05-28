@@ -45,6 +45,8 @@ using namespace std;
 // nginx also set to 512
 #define SERVER_LISTEN_BACKLOG 512
 
+DlpProcessTitle* dlp_process_title = new DlpProcessTitle();
+
 bool st_initilaized = false;
 int dlp_master_id = getpid();
 std::map<st_thread_t, int> cache;
@@ -432,5 +434,54 @@ int DlpStSocket::writev(const iovec *iov, int iov_size, ssize_t* nwrite)
     send_bytes += nb_write;
     
     return ret;
+}
+
+DlpProcessTitle::DlpProcessTitle()
+{
+    argc = 0;
+    argv = NULL;
+}
+
+DlpProcessTitle::~DlpProcessTitle()
+{
+}
+
+void DlpProcessTitle::set_argcv(int c, char** v)
+{
+    argc = c;
+    argv = v;
+    
+    argv_length.clear();
+    for (int i = 0; i < argc; i++) {
+        char* p = argv[i];
+        int nb_p = (int)strlen(p);
+        
+        if (nb_p <= 0) {
+            continue;
+        }
+        
+        argv_length.push_back(nb_p);
+    }
+}
+
+void DlpProcessTitle::set_title(const char* title)
+{
+    const char* start = title;
+    const char* end = start + strlen(title);
+    const char* pos = start;
+    
+    for (int i = 0; i < argc; i++) {
+        char* p = argv[i];
+        int nb_p = argv_length.at(i);
+        memset(p, 0, nb_p);
+    }
+    
+    for (int i = 0; i < argc && pos < end; i++) {
+        char* p = argv[i];
+        int nb_p = argv_length.at(i);
+        
+        int nwrite = snprintf(p, nb_p, "%s", pos);
+        pos += nwrite;
+    }
 }
 

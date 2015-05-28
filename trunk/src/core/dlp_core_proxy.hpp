@@ -40,14 +40,23 @@ struct DlpProxySrs
     int load;
 };
 
+struct DlpProxyServer
+{
+    int load;
+    
+    DlpProxyServer();
+    virtual ~DlpProxyServer();
+};
+
 class DlpProxyContext
 {
 private:
     int _port;
     int _fd;
+    DlpProxyServer* server;
     std::vector<DlpProxySrs*> sports;
 public:
-    DlpProxyContext();
+    DlpProxyContext(DlpProxyServer* s);
     virtual ~DlpProxyContext();
 public:
     virtual int initialize(int p, int f, std::vector<int> sps);

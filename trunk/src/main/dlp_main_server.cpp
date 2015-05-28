@@ -226,6 +226,7 @@ int main(int argc, char** argv)
 {
     int ret = ERROR_SUCCESS;
     
+    dlp_process_title->set_argcv(argc, argv);
     printf("srs-dolphin %s is a MultipleProcess for SRS, copyright (c) 2015 %s\n", DLP_VERSION, DLP_AUTHORS);
     
     // default params.
@@ -269,25 +270,41 @@ int main(int argc, char** argv)
         return ret;
     }
     
+    // set the title to master
+    dlp_process_title->set_title(DLP_MASTER);
+    
     // master wait all child terminated.
-    dlp_trace("dolphin forked %d workers, %d srs.", (int)worker_pids.size(), (int)srs_pids.size());
-    while (!worker_pids.empty() || !srs_pids.empty()){
+    int nb_dead = 0;
+    dlp_trace("dolphin forked %d workers, %d srs, %d dead.", (int)worker_pids.size(), (int)srs_pids.size(), nb_dead);
+    while (!worker_pids.empty() && !srs_pids.empty()){
         int status = 0;
         pid_t pid = -1;
-        if ((pid = waitpid(-1, &status, 0)) < 0) {
+        if ((pid = waitpid(-1, &status, WNOHANG)) < 0) {
             dlp_error("wait child process failed. pid=%d", pid);
             break;
         }
         
-        vector<int>::iterator it = std::find(worker_pids.begin(), worker_pids.end(), pid);
-        if (it != worker_pids.end()) {
-            worker_pids.erase(it);
-        } else if ((it = std::find(srs_pids.begin(), srs_pids.end(), pid)) != srs_pids.end()) {
-            srs_pids.erase(it);
+        // when got no pid.
+        if (pid > 0) {
+            vector<int>::iterator it = std::find(worker_pids.begin(), worker_pids.end(), pid);
+            if (it != worker_pids.end()) {
+                worker_pids.erase(it);
+            } else if ((it = std::find(srs_pids.begin(), srs_pids.end(), pid)) != srs_pids.end()) {
+                srs_pids.erase(it);
+            }
+            
+            nb_dead++;
+            dlp_trace("dolphin child process %d terminated, status=%d. there are running %d workers, %d srs, %d dead.",
+                pid, status, (int)worker_pids.size(), (int)srs_pids.size(), nb_dead);
         }
         
-        dlp_trace("dolphin child process %d terminated, status=%d. there are running %d workers, %d srs.",
-            pid, status, (int)worker_pids.size(), (int)srs_pids.size());
+        // update the title with dynamic data.
+        char ptitle[256];
+        snprintf(ptitle, sizeof(ptitle), "%s(%dw+%ds+%dd)", DLP_MASTER, (int)worker_pids.size(), (int)srs_pids.size(), nb_dead);
+        dlp_process_title->set_title(ptitle);
+        
+        // use system sleep.
+        usleep(DLP_CYCLE_TIEOUT_MS * 1000);
     }
     
     dlp_trace("dolphin terminated.");

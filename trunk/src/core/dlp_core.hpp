@@ -135,4 +135,26 @@ public:
     virtual int writev(const iovec *iov, int iov_size, ssize_t* nwrite);
 };
 
+// modify the argv for friendly display.
+class DlpProcessTitle
+{
+private:
+    int argc;
+    char** argv;
+    std::vector<int> argv_length;
+public:
+    DlpProcessTitle();
+    virtual ~DlpProcessTitle();
+public:
+    virtual void set_argcv(int c, char** v);
+    virtual void set_title(const char* value);
+};
+extern DlpProcessTitle* dlp_process_title;
+#define DLP_MASTER "srs-dolphin(master)"
+#define DLP_WORKER "srs-dolphin(worker)"
+#define DLP_SRS "srs-dolphin(srs)"
+
+// the cycle timeout for process.
+#define DLP_CYCLE_TIEOUT_MS 500
+
 #endif

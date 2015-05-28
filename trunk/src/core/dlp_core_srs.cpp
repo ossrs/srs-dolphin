@@ -69,6 +69,9 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
 {
     int ret = ERROR_SUCCESS;
     
+    // set the title to srs
+    dlp_process_title->set_title(DLP_SRS);
+    
     dlp_trace("dolphin srs serve port %d", rtmp_port);
     
     pid_t pid = -1;
@@ -87,9 +90,20 @@ int dlp_run_srs(int rtmp_port, string binary, string conf)
     // parent.
     dlp_trace("fork srs pid=%d, port=%d, binary=%s, conf=%s", pid, rtmp_port, binary.c_str(), conf.c_str());
     
-    int status = 0;
-    waitpid(pid, &status, 0);
-    dlp_warn("srs quit, status=%d, pid=%d", status, pid);
+    for (;;) {
+        int status = 0;
+        if (waitpid(pid, &status, WNOHANG) > 0) {
+            dlp_warn("srs quit, status=%d, pid=%d", status, pid);
+        }
+        
+        // update the title with dynamic data.
+        char ptitle[256];
+        snprintf(ptitle, sizeof(ptitle), "%s(%dr)", DLP_SRS, rtmp_port);
+        dlp_process_title->set_title(ptitle);
+        
+        // use system sleep.
+        usleep(DLP_CYCLE_TIEOUT_MS * 1000);
+    }
     
     return ret;
 }

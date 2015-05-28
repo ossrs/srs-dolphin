@@ -28,10 +28,20 @@ using namespace std;
 
 #include <st.h>
 
-DlpProxyContext::DlpProxyContext()
+DlpProxyServer::DlpProxyServer()
+{
+    load = 0;
+}
+
+DlpProxyServer::~DlpProxyServer()
+{
+}
+
+DlpProxyContext::DlpProxyContext(DlpProxyServer* s)
 {
     _port = -1;
     _fd = -1;
+    server = s;
 }
 
 DlpProxyContext::~DlpProxyContext()
@@ -87,6 +97,7 @@ DlpProxySrs* DlpProxyContext::choose_srs()
     
     if (match) {
         match->load++;
+        server->load++;
     }
     
     return match;
@@ -99,6 +110,7 @@ void DlpProxyContext::release_srs(DlpProxySrs* srs)
     
     if (it != sports.end()) {
         srs->load--;
+        server->load--;
     }
 }
 
@@ -304,16 +316,21 @@ int dlp_run_proxyer(vector<int> ports, std::vector<int> fds, std::vector<int> sp
 {
     int ret = ERROR_SUCCESS;
     
+    // set the title to worker
+    dlp_process_title->set_title(DLP_WORKER);
+    
     if ((ret = dlp_st_init()) != ERROR_SUCCESS) {
         return ret;
     }
+    
+    DlpProxyServer server;
     
     dlp_assert(ports.size() == fds.size());
     for (int i = 0; i < (int)ports.size(); i++) {
         int port = ports.at(i);
         int fd = fds.at(i);
         
-        DlpProxyContext* context = new DlpProxyContext();
+        DlpProxyContext* context = new DlpProxyContext(&server);
         if ((ret = context->initialize(port, fd, sports)) != ERROR_SUCCESS) {
             dlp_freep(context);
             return ret;
@@ -329,7 +346,15 @@ int dlp_run_proxyer(vector<int> ports, std::vector<int> fds, std::vector<int> sp
         }
     }
     
-    st_thread_exit(NULL);
+    for (;;) {
+        // update the title with dynamic data.
+        char ptitle[256];
+        snprintf(ptitle, sizeof(ptitle), "%s(%dc)", DLP_WORKER, server.load);
+        dlp_process_title->set_title(ptitle);
+        
+        // use st sleep.
+        st_usleep(DLP_CYCLE_TIEOUT_MS * 1000);
+    }
     
     return ret;
 }
