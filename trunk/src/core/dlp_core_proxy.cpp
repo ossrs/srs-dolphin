@@ -259,6 +259,8 @@ int dlp_connection_proxy(DlpProxyConnection* conn)
     // TODO: FIXME: retry next srs when error.
     st_netfd_t stfd = NULL;
     if ((ret = dlp_socket_connect("127.0.0.1", srs->port, ST_UTIME_NO_TIMEOUT, &stfd)) != ERROR_SUCCESS) {
+        context->release_srs(srs);
+        dlp_close_stfd(stfd);
         return ret;
     }
     
