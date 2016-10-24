@@ -1,6 +1,6 @@
 # srs-dolphin
 
-The dolphin is a MultipleProcess SRS [SRS][SRS] container, which start multiple [SRS][SRS] in edge mode in seperate process.
+The dolphin is a MultipleProcess SRS [SRS][SRS] container, which start multiple [SRS][SRS] in edge mode in separate process.
 
 ## About
 
