@@ -1,5 +1,7 @@
 # srs-dolphin
 
+Just a deprecated architecture, so arhive it.
+
 SRS-Dolphin is a multiple process solution for [SRS](https://github.com/ossrs/srs).
 
 It's a TCP proxy over [ST](https://github.com/ossrs/state-threads), which is deprecated.
